@@ -1,0 +1,139 @@
+.homeContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  min-height: 80vh;
+}
+.homeCardListFilterContainer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.foundTypeContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.foundType {
+  width: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.foundTypeActive {
+  width: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #000;
+}
+
+.homeCardListContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.bannerContainer {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.cardBanner {
+  display: flex;
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px 12px 0px 0px;
+  border: 1px solid #fff;
+}
+.cardLogo {
+  margin-left: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #000;
+}
+.cardLogo img {
+  border: 1px solid #fff;
+  margin-top: -0.5rem;
+  object-fit: cover;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+}
+.cardBodyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+.cardBodyInfoContent {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+.proggressBarContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.progressBar {
+  background-color: #bfbdbd;
+  width: 100%;
+  height: 0.7rem;
+  border-radius: 10px;
+}
+.progressBarContent {
+  background-color: aqua;
+  height: 0.7rem;
+  border-radius: 10px;
+}
+.progressBarBottom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: #000;
+  font-weight: bold;
+}
+.span {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cardFooter {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -1rem;
+  padding: 0.5rem 1rem;
+}
+.socialMediaContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.socialMediaContainer svg {
+  color: #000;
+}
