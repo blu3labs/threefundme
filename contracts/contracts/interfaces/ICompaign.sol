@@ -32,6 +32,19 @@ interface ICompaign {
         address contributor;
     }
 
+
+    //errors list 
+    error NoStepFound(uint stepId);
+    error StepExpired(uint stepId);
+    error OnlyCurrentStep(uint stepId);
+    error CompaignNotAvailable();
+    error PostsAlreadyPublished(uint stepId);
+    error StepNotAvailableForContribution(uint stepId);
+    error NoEnoughPosts(uint stepId);
+    error StepCantSwitch(uint stepId);
+    error ContributionNotFound(address contributor, uint stepId);
+
+    function initialize(CompaignInfo calldata info, address factoryManager) external;
  
 
     
