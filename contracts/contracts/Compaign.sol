@@ -105,11 +105,84 @@ contract Compaign is Initializable, ERC721Upgradeable {
          revert ICompaign.StepExpired(stepId);
        }
        require(getStatusCompaigned() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS,"Compaign not available");
+        ICompaign.PostInfo memory postInfo = ICompaign.PostInfo({
+            details: postDetails,
+            timestamp: block.timestamp
+        });
 
-       
+    
+        posts[stepId][postsLengthForStep[stepId] + 1] = postInfo;
+        postsLengthForStep[stepId]++;
+        emit PostPublished(postDetails[0], stepId);
+
 
     }
 
+    function contribute(uint amount) external payable {
+            // check collected
+        if (currentStepStatus > 0 ){
+            require(stepAmountCollected[currentStepStatus - 1], "Tokens not yet collected");
+        }
+        require(getStatusCompaign() != StatusCompaign.FAILED &&  compaignDetails.steps[currentStepStatus].amountToBeRaised > stepCollect[currentStepStatus], "Step completed or failed");
+        if (compaignDetails.currency == address(0)) {
+            require(msg.value >= amount, "Invalid amount");
+        }else {
+            ERC20(compaignDetails.currency).transferFrom(msg.sender, address(this), amount);
+        }
+        ICompaign.UserContribution memory userCont =  userContributions[msg.sender][currentStepStatus];
+        uint newTokenId = uint160(address(msg.sender)) + currentStepStatus + block.timestamp;
+
+        if (userCont.timestamp == 0) {
+            // not yet contributed.
+            userCont.timestamp = block.timestamp;
+            userCont.amount = amount;
+            newTokenId += contributorsAddress.length();
+            userContributions[msg.sender][currentStepStatus] = userCont;
+
+            if(!contributorsAddress.contains(msg.sender)) {
+            super._mint(msg.sender, newTokenId);
+            contributorTokenId[msg.sender] = newTokenId;
+          
+                contributorsAddress.add(msg.sender);
+            }
+        } else {
+            userCont.amount += amount;
+        }
+
+        
+        hasContribute[msg.sender] = true;
+        ICompaignFactoryManager(factoryManager).registerContributionUser(msg.sender, address(this));
+        totalAmount += amount;
+        stepCollect[currentStepStatus] += amount;
+      
+        emit UserContributed(msg.sender, amount);
+    }
+
+    function collectTokens() external onlyCompaignOwner  {
+        require(getStatusCompaign() == StatusCompaign.SUCCESS, "Step not yet successfuly finished");
+        // posts checks
+        ICompaign.StepInfo memory stepInfo = compaignDetails.steps[currentStepStatus - 1];
+        if (postsLengthForStep[currentStepStatus - 1] < 2) {
+            revert ICompaign.NoEnoughPosts(currentStepStatus);
+        }
+        if (compaignDetails.currency == address(0)) {
+            payable(compaignDetails.owner).transfer(stepInfo.amountToBeRaised);
+        } else {
+            ERC20(compaignDetails.currency).transfer(compaignDetails.owner, stepInfo.amountToBeRaised);
+        }
+
+        stepAmountCollected[currentStepStatus - 1] = true;
+        emit TokenCollected(compaignDetails.owner, stepInfo.amountToBeRaised, currentStepStatus);
+    }
+
+    function switchStep() external onlyCompaignOwner {
+        if (getStatusCompaign() != StatusCompaign.STEP_SWITCH_REQUIRED) {
+            revert ICompaign.StepCantSwitch(currentStepStatus);
+        }
+        // require(getStatusCompaign() == StatusCompaign.STEP_SWITCH_REQUIRED, "Step cannot be switch");
+        currentStepStatus = currentStepStatus + 1;
+        emit NextStepSwitch(compaignDetails.owner, currentStepStatus - 1, currentStepStatus);
+    }
 
 
 
