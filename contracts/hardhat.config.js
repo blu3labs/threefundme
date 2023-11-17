@@ -3,8 +3,6 @@ require("dotenv").config()
 /** @type import('hardhat/config').HardhatUserConfig */
 const accountConfig = [process.env.PRIVATE_KEY]
 module.exports = {
-  solidity: "0.8.19",
-
   networks: {
     //testnet
     baseGoerliTestnet:{
@@ -39,5 +37,16 @@ module.exports = {
       url:"https://rpc.goerli.linea.build",
       accounts:accountConfig
     }
+  },
+  solidity:{
+    versions: [
+      {
+        version:"0.8.20",
+        optimizer:{
+          enabled:true,
+          runs:200
+        }
+      }
+    ]
   }
 };
