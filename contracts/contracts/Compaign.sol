@@ -45,6 +45,8 @@ contract Compaign is Initializable, ERC721Upgradeable {
     }
 
 
+
+
     event PostPublished(string title, uint stepId);
     event Withdraw(address indexed contributor, uint amount);
     event TokenCollected(address indexed owner, uint amount, uint stepId);
@@ -68,6 +70,15 @@ contract Compaign is Initializable, ERC721Upgradeable {
 
     uint public totalAmount;
     address public factoryManager;
+
+    modifier onlyBuyer {
+        require(hasContribute[msg.sender], "Only buyer can call this function");
+        _;
+    }
+    modifier onlyCompaignOwner() {
+        require(msg.sender == compaignDetails.owner, "Only compaign owner can call this function");
+        _;
+    }
 
     function initialize(ICompaign.CompaignInfo calldata info, address factoryManager_ ) public initializer {
         __ERC721_init(info.details[0], info.details[0]);
@@ -184,6 +195,29 @@ contract Compaign is Initializable, ERC721Upgradeable {
         emit NextStepSwitch(compaignDetails.owner, currentStepStatus - 1, currentStepStatus);
     }
 
+   function withdraw() external  onlyBuyer {
+        require(getStatusCompaign() == StatusCompaign.FAILED, "Compaign not failed");
+        ICompaign.UserContribution memory userCont = userContributions[msg.sender][currentStepStatus];
+        if (userCont.timestamp <= 0) {
+            revert ICompaign.ContributionNotFound(msg.sender, currentStepStatus);
+        }
+        // require(userCont.timestamp > 0, "Contribution not found");
+        if (compaignDetails.currency == address(0)) {
+            payable(msg.sender).transfer(userCont.amount);
+        } else {
+            ERC20(compaignDetails.currency).transfer(msg.sender, userCont.amount);
+        }
+        uint tokenId = contributorTokenId[msg.sender];
+
+        super.transferFrom(msg.sender, address(this), tokenId);
+        super._burn(tokenId);
+     
+        contributorsAddress.remove(msg.sender);
+        ICompaignFactoryManager(factoryManager).removeContributionUser(msg.sender, address(this));
+        emit Withdraw(msg.sender, userCont.amount);
+    }
+
+    // getters
 
 
 }
