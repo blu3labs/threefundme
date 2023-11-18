@@ -2,30 +2,37 @@ import React from "react";
 import "./index.css";
 import { Typography, Avatar, Card, Profile } from "@ensdomains/thorin";
 import ConnectWallet from "./connectWallet";
+import { NavLink } from "react-router-dom";
 function Header() {
   return (
     <div className="headerContainer">
-      <Typography fontVariant="extraLargeBold">ThreeFoundMe</Typography>
+      <NavLink to="/">
+        <Typography fontVariant="extraLargeBold">ThreeFoundMe</Typography>
+      </NavLink>
 
       <div className="headerMenuContainer">
-        <Typography fontVariant="large">
-          <div
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            List
-          </div>
-        </Typography>
-        <Typography fontVariant="large">
-          <div
-            style={{
-              cursor: "pointer",
-            }}
-          >
-            Create
-          </div>
-        </Typography>
+        <NavLink to="/">
+          <Typography fontVariant="large">
+            <div
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              List
+            </div>
+          </Typography>
+        </NavLink>
+        <NavLink to="/create">
+          <Typography fontVariant="large">
+            <div
+              style={{
+                cursor: "pointer",
+              }}
+            >
+              Create
+            </div>
+          </Typography>
+        </NavLink>
       </div>
       <div className="headerConnectContainer">
         <ConnectWallet />

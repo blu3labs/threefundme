@@ -91,9 +91,10 @@ function Create() {
       date: "",
     },
   ]);
-
+  const [loading, setLoading] = useState();
   const handleCreate = async () => {
     try {
+      setLoading(true);
       const signer = walletClientToSigner(walletCl);
       const logoUrl = await addFile(logo);
       console.log(logoUrl, "logoUrl");
@@ -104,8 +105,8 @@ function Create() {
         steps.push([
           [stepArray[i].title],
           [],
-          ethers.utils.parseEther(stepArray[i].price),
           new Date(stepArray[i].date).getTime() / 1000,
+          ethers.utils.parseEther(stepArray[i].price),
         ]);
       }
       const handleCreateData = [
@@ -135,13 +136,19 @@ function Create() {
         chainId: chain?.id,
         switchNetworkAsync: switchNetworkAsync,
       });
+      await tx.wait()
+      setLoading(false);
       console.log(tx, "tx");
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
 
-  const [userBalance, setUserBalance] = useState();
+  const [userBalance, setUserBalance] = useState({
+    allowance: 0,
+    balance: 0,
+  });
   const fethcUserAllowance = async () => {
     try {
       const provider = new ethers.providers.JsonRpcProvider(rpc[chain?.id]);
@@ -171,6 +178,7 @@ function Create() {
   console.log(userBalance, "userBalance");
   const approve = async () => {
     try {
+      setLoading(true);
       const signer = walletClientToSigner(walletCl);
       const contract = new ethers.Contract(
         apeCoinAddresses[chain?.id],
@@ -179,9 +187,13 @@ function Create() {
       );
       const tx = await contract.approve(
         compaignFactoryAddress[chain?.id],
-        ethers.utils.parseEther(userBalance?.balance?.toString())
+        ethers.constants.MaxUint256
       );
+      await tx.wait();
+      await fethcUserAllowance();
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   };
@@ -520,7 +532,22 @@ function Create() {
           Add Step
         </Button>
 
-        <Button onClick={() => handleCreate()}>Create</Button>
+        <Button
+          disabled={loading}
+          style={{
+            opacity: loading && 0.5,
+            cursor: loading && "progress",
+          }}
+          onClick={() => {
+            if (userBalance?.allowance <= 0) {
+              approve();
+            } else {
+              handleCreate();
+            }
+          }}
+        >
+          {userBalance?.allowance <= 0 ? "Approve" : "Create"}
+        </Button>
       </Card>
     </div>
   );

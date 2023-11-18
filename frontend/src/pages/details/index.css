@@ -204,7 +204,7 @@
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 0.3rem;
+  padding: 0.3rem;
 }
 .chatInputContainer {
   border: none;
@@ -245,9 +245,16 @@
   height: auto;
   color: #fff;
 }
-.closebutton{
-  cursor: pointer;
+.closebutton {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #3888ff;
+  padding: 0.5rem;
+  border-radius: 12px 12px 0 0;
+  color: #fff;
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0;
+  left: 0;
 }

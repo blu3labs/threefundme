@@ -19,6 +19,8 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import PostCard from "./components/postCard";
 import ChatCard from "./components/chatCard";
 import { IoChatbubble } from "react-icons/io5";
+import Countdown from "react-countdown";
+import moment from "moment";
 import {
   useNetwork,
   useAccount,
@@ -57,7 +59,6 @@ function Details() {
   const fethcUserAllowance = async () => {
     try {
       const provider = new ethers.providers.JsonRpcProvider(rpc[chain?.id]);
-      console.log(apeCoinAddresses[chain?.id], "apeCoinAddress");
       const contract = new ethers.Contract(
         apeCoinAddresses[chain?.id],
         erc20ABI,
@@ -73,9 +74,10 @@ function Details() {
       console.log(error);
     }
   };
+  const [contributeLoading, setContributeLoading] = useState(false);
   const approve = async () => {
     try {
-      console.log("approve");
+      setContributeLoading(true);
       const signer = walletClientToSigner(walletCl);
       const contract = new ethers.Contract(
         apeCoinAddresses[chain?.id],
@@ -86,7 +88,10 @@ function Details() {
         compaignAddress,
         ethers.constants.MaxUint256
       );
+      await fethcUserAllowance();
+      setContributeLoading(false);
     } catch (error) {
+      setContributeLoading(false);
       console.log(error);
     }
   };
@@ -103,18 +108,38 @@ function Details() {
         compaignAbi,
         provider
       );
+      const start = new Date().getTime();
       const compaignDetails = await contract.getCompaignInfo();
-      console.log(compaignDetails, "data");
+
       let allSteps = [];
+      let posts = [];
+      let stepsPosts = [];
       for (let steps of compaignDetails["allSteps"]) {
+        for (let post of steps["posts"]) {
+          posts.push({
+            step: steps["stepId"]?.toString(),
+            img: post["details"][0],
+            title: post["details"][1],
+            desc: post["details"][2],
+            date: moment(
+              new Date(post["timestamp"]?.toString() * 1000).getTime()
+            ).format("DD/MM/YYYY HH:mm"),
+          });
+        }
         allSteps.push({
           collected: steps["collected"],
           currentAmount: steps["currentAmount"]?.toString(),
           expireTime: steps["expireTime"]?.toString(),
           stepId: steps["stepId"]?.toString(),
         });
+        stepsPosts.push({
+          step: steps["stepId"]?.toString(),
+          count: steps["posts"]?.length,
+        });
       }
       setDetails({
+        posts: posts,
+        stepsPosts: stepsPosts,
         address: compaignAddress,
         id: compaignDetails["id"],
         totalAmount: compaignDetails["totalAmount"]?.toString(),
@@ -134,11 +159,13 @@ function Details() {
         allSteps: allSteps,
         owner: compaignDetails["compaign"]["owner"],
       });
-      hasContribute(compaignDetails["currentStatus"]);
+
+      await hasContribute(compaignDetails["currentStatus"]);
     } catch (error) {
       console.log(error);
     }
   };
+  const [isContribute, setisContribute] = useState(false);
   const hasContribute = async (id) => {
     try {
       const contract = new ethers.Contract(
@@ -147,6 +174,7 @@ function Details() {
         provider
       );
       const tx = await contract.hasContribute(address, id);
+      setisContribute(tx);
       console.log(tx, "hasContribute");
     } catch (error) {
       console.log(error, "error");
@@ -161,85 +189,7 @@ function Details() {
     }, 7000);
     return () => clearInterval(interval);
   }, [compaignAddress]);
-  console.log(details, "details");
   let id = "0xdsqdsdsqdqdsd";
-  const dummyArray = [
-    {
-      step: "1",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "1",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "1",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "2",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "2",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "2",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "3",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-    {
-      step: "4",
-      title: "Project Started",
-      date: "15/03/2023 15:35",
-      img: "https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp",
-      desc: "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Laborum voluptatum provident harum non modi iure necessitatibus omnis id nesciunt molestias suscipit minus reprehenderit, dicta tenetur nulla doloribus natus ab ducimus itaque dolores accusamus facere fugit sit. Delectus molestias praesentium itaque consectetur fugiat, et temporibus ipsam omnis quidem provident dolor quos",
-    },
-  ];
-
-  const PostSteps = [
-    {
-      step: "1",
-      count: 3,
-    },
-    {
-      step: "2",
-      count: 3,
-    },
-    {
-      step: "3",
-      count: 1,
-    },
-    {
-      step: "4",
-      count: 1,
-    },
-  ];
 
   const [modalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState();
@@ -259,9 +209,10 @@ function Details() {
   useEffect(() => {
     convertPreview();
   }, [file]);
-
+  const [ownerLoading, setOwnerLoading] = useState(false);
   const handleOwnerFunctions = async (method) => {
     try {
+      setOwnerLoading(true);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
         signer: signer,
@@ -270,30 +221,38 @@ function Details() {
         method: method,
         switchNetworkAsync: switchNetworkAsync,
       });
-      console.log(tx);
+      await tx.wait();
+      setOwnerLoading(false);
     } catch (error) {
       console.log(error);
+      setOwnerLoading(false);
     }
   };
   const handleContribute = async () => {
     try {
+      console.log("girdi mi")
+      setContributeLoading(true);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
         signer: signer,
         address: compaignAddress,
         abi: compaignAbi,
         method: "contribute",
-        args: [ethers.utils.parseEther(amount?.toString())],
+        args: [ethers.utils.parseEther(amount?.toString() || "0")],
         switchNetworkAsync: switchNetworkAsync,
       });
-      console.log(tx);
+      await tx.wait();
+      setContributeLoading(false);
     } catch (error) {
-      console.log(amount);
+      setContributeLoading(false);
+      console.log(error);
     }
   };
-
+  console.log(contributeLoading,"contributeloading")
+  const [withdrawLoading, setWithdrawLoading] = useState(false);
   const handleWithdraw = async () => {
     try {
+      setWithdrawLoading(true);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
         signer: signer,
@@ -302,18 +261,22 @@ function Details() {
         method: "withdraw",
         switchNetworkAsync: switchNetworkAsync,
       });
-      console.log(tx);
+      await tx.wait();
+
+      setWithdrawLoading(false);
     } catch (error) {
-      console.log(amount);
+      console.log(error);
+      setWithdrawLoading(false);
     }
   };
   const [postData, setPostData] = useState({
     title: "",
     description: "",
   });
-  console.log(postData, "postData");
+  const [postLoading, setPostLoading] = useState(false);
   const makePost = async () => {
     try {
+      setPostLoading(true);
       const fileUrl = await addFile(file);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
@@ -327,9 +290,13 @@ function Details() {
         ],
         switchNetworkAsync: switchNetworkAsync,
       });
-      console.log(tx);
+      await tx.wait();
+
+      setModalOpen(false);
+      setPostLoading(false);
     } catch (error) {
       console.log(error);
+      setPostLoading(false);
     }
   };
 
@@ -343,14 +310,16 @@ function Details() {
           }}
           title="Add Post"
         >
-          <img
-            src={filePreview}
-            style={{
-              height: "200px",
-              objectFit: "cover",
-              borderRadius: "12px",
-            }}
-          />
+          {filePreview && (
+            <img
+              src={filePreview}
+              style={{
+                height: "200px",
+                objectFit: "cover",
+                borderRadius: "12px",
+              }}
+            />
+          )}
           <FileInput maxSize={1} onChange={(file) => setFile(file)}>
             {(context) =>
               context.name ? (
@@ -411,7 +380,10 @@ function Details() {
           <Button
             style={{
               height: "2rem",
+              opacity: postLoading && "0.5",
+              cursor: postLoading && "progress",
             }}
+            disabled={postLoading}
             onClick={() => makePost()}
           >
             Save
@@ -439,22 +411,16 @@ function Details() {
   const [messagesChat, setMessages] = React.useState([]);
   const [chatContent, setChatContent] = React.useState("");
   useEffect(() => {
-    console.log(wakuStatus);
-
     setWakuStatus("Starting");
 
     // Define DNS node list
 
-    console.log("starting");
     createLightNode({
       defaultBootstrap: true,
     })
       .then((waku) => {
-        console.log("createdé");
-
         waku.start().then(() => {
           setWaku(waku);
-          console.log("startedd");
 
           setWakuStatus("Connecting");
         });
@@ -468,11 +434,9 @@ function Details() {
     // We do not handle disconnection/re-connection in this example
     if (wakuStatus === "Connected") return;
 
-    console.log("wait peer");
     waitForRemotePeer(waku, [Protocols.LightPush, Protocols.Store])
       .then(() => {
         // We are now connected to a store node
-        console.log("Connected For lightpush and Store");
         setWakuStatus("Connected");
       })
       .catch((err) => {
@@ -518,17 +482,14 @@ function Details() {
         let messages = await Promise.all(
           messagesPromises.map(async (p) => {
             const msg = await p;
-            console.log("MESSAGE ", msg);
 
             let decoded = decodeMessage(msg);
             if (!decoded) {
-              console.log("Failed to decode message");
               return;
             }
             return decoded;
           })
         );
-        console.log("messages received by peer ", messages);
 
         // filter by unique id.
         let messagesOfficial = [];
@@ -597,7 +558,10 @@ function Details() {
             <Button
               style={{
                 height: "2rem",
+                opacity: ownerLoading && "0.5",
+                cursor: ownerLoading && "progress",
               }}
+              disabled={ownerLoading}
               onClick={() => handleOwnerFunctions("switchStep")}
             >
               Next Step
@@ -613,7 +577,10 @@ function Details() {
             <Button
               style={{
                 height: "2rem",
+                opacity: ownerLoading && "0.5",
+                cursor: ownerLoading && "progress",
               }}
+              disabled={ownerLoading}
               onClick={() => handleOwnerFunctions("collectTokens")}
             >
               Collect Tokens
@@ -686,6 +653,23 @@ function Details() {
                 {Number(details?.currentStatus) + 1}
               </Typography>
             </div>
+            <div className="fundInfoContent">
+              <Typography fontVariant="smallBold">
+                Active Steps Countdown
+              </Typography>
+              <Typography fontVariant="small">
+                {details && (
+                  <>
+                    <Countdown
+                      date={
+                        details?.allSteps[details?.currentStatus]?.expireTime *
+                        1000
+                      }
+                    />
+                  </>
+                )}
+              </Typography>
+            </div>
 
             <div className="progressBarContainer">
               <div className="progressBar">
@@ -720,15 +704,27 @@ function Details() {
             <Button
               style={{
                 height: "2rem",
+                opacity: contributeLoading && "0.5",
+                cursor: contributeLoading && "progress",
               }}
-              onClick={() => handleContribute()}
+              disabled={contributeLoading}
+              onClick={() => {
+                if (userBalance?.allowance <= 0) {
+                  approve();
+                } else {
+                  handleContribute();
+                }
+              }}
             >
-              Contribute
+              {userBalance?.allowance <= 0 ? "Approve" : "Contribute"}
             </Button>
             <Button
               style={{
                 height: "2rem",
+                opacity: withdrawLoading && "0.5",
+                cursor: withdrawLoading && "progress",
               }}
+              disabled={withdrawLoading}
               onClick={() => handleWithdraw()}
             >
               withdraw
@@ -737,43 +733,53 @@ function Details() {
         </div>
         <div className="detailspProjectPostContainer">
           <div className="detailsProjectPosts">
-            {dummyArray.map((e) => {
-              return <PostCard />;
-            })}
+            {details &&
+              details?.posts?.map((e, key) => {
+                return <PostCard item={e} key={key} />;
+              })}
           </div>
           <div className="detailsProjectPostsStepBar">
-            {PostSteps.map((e) => {
-              return (
-                <div
-                  className="detailsProjectPostsSteps"
-                  style={{
-                    height: `${e.count * 365}px`,
-                  }}
-                >
-                  <div className="stepText">
-                    <Typography fontVariant="smallBold">{e.step}</Typography>
-                  </div>
-                </div>
-              );
-            })}
+            {details &&
+              details?.stepsPosts?.map((e, key) => {
+                if (e.count > 0) {
+                  return (
+                    <div
+                      key={key}
+                      className="detailsProjectPostsSteps"
+                      style={{
+                        height: `${e.count * 365}px`,
+                      }}
+                    >
+                      <div className="stepText">
+                        <Typography fontVariant="smallBold">
+                          {e.step}
+                        </Typography>
+                      </div>
+                    </div>
+                  );
+                }
+              })}
           </div>
         </div>
       </div>
-      <div className="chatContainer">
-        {chatOpen ? (
-          <ChatCard
-            setChatOpen={setChatOpen}
-            onSendMessage={sendMessage}
-            chatContent={chatContent}
-            setChatContent={setChatContent}
-            messages={messagesChat}
-          />
-        ) : (
-          <div className="chatOpenButton" onClick={() => setChatOpen(true)}>
-            <IoChatbubble />
-          </div>
-        )}
-      </div>
+      {isContribute && (
+        <div className="chatContainer">
+          {chatOpen ? (
+            <ChatCard
+              details={details}
+              setChatOpen={setChatOpen}
+              onSendMessage={sendMessage}
+              chatContent={chatContent}
+              setChatContent={setChatContent}
+              messages={messagesChat}
+            />
+          ) : (
+            <div className="chatOpenButton" onClick={() => setChatOpen(true)}>
+              <IoChatbubble />
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
