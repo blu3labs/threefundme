@@ -30,6 +30,7 @@ contract Compaign is  ERC721Upgradeable {
     }
 
     struct CompaignFullInfo {
+        bytes32 id;
         ICompaign.CompaignInfo compaign;
         uint currentStatus;
         uint totalAmount;
@@ -59,6 +60,7 @@ contract Compaign is  ERC721Upgradeable {
 
     EnumerableSet.AddressSet contributorsAddress;
     ICompaign.CompaignInfo compaignDetails;
+    bytes32 id;
     mapping(address => mapping(uint => bool)) public hasContribute;
     mapping(address => uint) public contributorTokenId;
     mapping(uint => uint) public stepCollect;
@@ -84,6 +86,8 @@ contract Compaign is  ERC721Upgradeable {
         __ERC721_init(info.details[0], info.details[0]);
         compaignDetails = info;
         factoryManager = factoryManager_;
+        id = keccak256(abi.encodePacked(address(this), info.owner, keccak256(abi.encodePacked(block.timestamp, block.number))));
+
     }  
 
     function transferFrom(address from, address to, uint tokenId) public override {
@@ -304,6 +308,7 @@ contract Compaign is  ERC721Upgradeable {
         }
         CompaignFullInfo memory full = CompaignFullInfo({
             compaign: compaignDetails,
+            id: id,
             currentStatus: currentStepStatus,
             totalAmount: totalAmount,
             statusCompaign: getStatusCompaign(),
