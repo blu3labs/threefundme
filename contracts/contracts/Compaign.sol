@@ -125,7 +125,7 @@ contract Compaign is  ERC721Upgradeable {
             timestamp: block.timestamp
         });
 
-    
+        
         posts[stepId][postsLengthForStep[stepId] + 1] = postInfo;
         postsLengthForStep[stepId]++;
         emit PostPublished(postDetails[0], stepId);
@@ -139,6 +139,9 @@ contract Compaign is  ERC721Upgradeable {
             require(stepAmountCollected[currentStepStatus - 1], "Tokens not yet collected");
         }
         require(getStatusCompaign() != StatusCompaign.FAILED &&  compaignDetails.steps[currentStepStatus].amountToBeRaised > stepCollect[currentStepStatus], "Step completed or failed");
+        if (compaignDetails.numericDetails.length > 0) {
+            require(amount >= compaignDetails.numericDetails[0], "Minimum contribution not reached");
+        }
         if (compaignDetails.currency == address(0)) {
             require(msg.value >= amount, "Invalid amount");
         }else {
@@ -305,6 +308,10 @@ contract Compaign is  ERC721Upgradeable {
                 collected: stepAmountCollected[i],
                 posts: new ICompaign.PostInfo[](postsLengthForStep[i])
             });
+           ICompaign.PostInfo[] memory listPosts = new ICompaign.PostInfo[](postsLengthForStep[i]);
+            for(uint j = 0; j < postsLengthForStep[i]; j++) {
+                listSteps[i].posts[j] = posts[i][j + 1];
+            }
         }
         CompaignFullInfo memory full = CompaignFullInfo({
             compaign: compaignDetails,

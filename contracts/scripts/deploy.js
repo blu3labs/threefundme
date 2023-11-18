@@ -13,7 +13,7 @@ async function main() {
   
   console.log("Deployment started..")
   let apecoin = await hre.ethers.getContractFactory("Ape")
-  apecoin = await apecoin.deploy("APE","APE","10000000000000000000000000000000")
+  apecoin = await apecoin.deploy("ApeCoin","ApeCoin","10000000000000000000000000000000")
 
   console.log("ApeCoin deployed at: ", apecoin.address)
   let factoryManager = await hre.ethers.getContractFactory("CompaignFactoryManager")

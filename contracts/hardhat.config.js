@@ -40,6 +40,10 @@ module.exports = {
     lineaTestnet:{
       url:"https://rpc.goerli.linea.build",
       accounts:accountConfig
+    },
+    polygonZkEvmTestnet:{
+      url:"https://rpc.public.zkevm-test.net",
+      accounts: accountConfig
     }
   },
   solidity:{

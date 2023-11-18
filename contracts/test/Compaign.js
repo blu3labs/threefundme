@@ -19,8 +19,8 @@ describe("Compaign", function() {
         factory = await factory.deploy(impl.address, factoryManager.address)
         let tx = await factoryManager.setFactory(factory.address, true)
         await tx.wait()
-        ape = await ethers.getContractFactory("Ape")
-        ape = await ape.deploy("APE","APE","10000000000000000000000000000000")
+        ape = await ethers.getContractFactory("ApeCoin")
+        ape = await ape.deploy("ApeCoin","ApeCoin","10000000000000000000000000000000")
         
         tx = await factoryManager.setAllowedTokenCurrency(ape.address, true)
         await tx.wait()
@@ -85,7 +85,8 @@ describe("Compaign", function() {
     
         let post2 = await compaign.makePost(0,["Myyy second postt", "here we go"])
         await post2.wait()
-
+        let post66 = await compaign.makePost(0,["Myyy third postt", "here we go"])
+        await post66.wait()
         let txapprov2 = await ape.approve(compaign.address, "1500000000000000000000")
         await txapprov2.wait()
 
@@ -97,7 +98,8 @@ describe("Compaign", function() {
         await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step1expire).add(1)));
   
         let info2  =await compaign.getCompaignInfo()
-        console.log(info2, "info")
+        console.log(info2.allSteps[0].posts, "info")
+        process.exit(1)
         // able to change to next step.
         tx = await compaign.switchStep()
         await tx.wait()
