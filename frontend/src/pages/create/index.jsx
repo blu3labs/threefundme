@@ -413,7 +413,7 @@ function Create() {
             }}
           />
           <Input
-            placeholder="Expired Date"
+            placeholder="Date"
             label="Date"
             suffix="Date"
             value={stepArray[0].date}
@@ -422,7 +422,7 @@ function Create() {
               copyArray[0].date = e.target.value;
               setStepArray(copyArray);
             }}
-            type="Date"
+            type="datetime-local"
           />
         </div>
         <div className="stepInptutContainer">
@@ -465,7 +465,7 @@ function Create() {
               copyArray[1].date = e.target.value;
               setStepArray(copyArray);
             }}
-            type="Date"
+            type="datetime-local"
           />
         </div>
         {stepArray?.map((item, index) => {
@@ -511,7 +511,7 @@ function Create() {
                     copyArray[index].title = e.target.value;
                     setStepArray(copyArray);
                   }}
-                  type="Date"
+                  type="datetime-local"
                 />
                 <div
                   className="deleteStepContent"
