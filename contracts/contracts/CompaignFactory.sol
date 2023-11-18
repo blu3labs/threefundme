@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/ICompaignFactoryManager.sol";
 import "./interfaces/ICompaign.sol";
+import "./interfaces/ICompaignFactory.sol";
 
 // The compaign factory will create the Compaign address and will register the compaign in the CompaignFactoryManager
 contract CompaignFactory is Initializable, ReentrancyGuard, Ownable {
@@ -29,11 +30,33 @@ contract CompaignFactory is Initializable, ReentrancyGuard, Ownable {
     }
 
     modifier manageFees(address tokenAddress) {
-        //TODO
+        uint fee = ICompaignFactoryManager(compaignFactoryManager).fees(tokenAddress);
+        address feeAddr = ICompaignFactoryManager(compaignFactoryManager).feeAddress();
+        if (tokenAddress == address(0)) {
+            if(msg.value < fee) {
+                revert ICompaignFactory.InsufficientFee(address(0), fee);
+            }
+            payable(feeAddr).transfer(fee);
+            if (msg.value > fee) {
+                // refund 
+                payable(msg.sender).transfer(msg.value - fee);
+            }
+        } else {
+            uint balance = IERC20(tokenAddress).balanceOf(msg.sender);
+            if (balance < fee) {
+                return ICompaignFactory.InsufficientFee(tokenAddress, fee);
+            }
+            uint allow = IERC20(tokenAddress).allowance(msg.sender, address(this));
+            if (allow < fee) {
+                revert ICompaignFactory.InvalidApprovalToken(tokenAddress, msg.sender, fee);
+            }
+            IERC20(tokenAddress).transferFrom(msg.sender, feeAddr, fee);
+        }
+        _;
     }
     function setImplementation( address newImpl) external onlyOwner {
         implementation = newImpl;
-    }
+    }   
 
     function createCompaign(ICompaign.CompaignInfo memory info) external payable onlyAllowedToken(info.currency) nonReentrant manageFees(info.currency) {
         address compaignAddress;
