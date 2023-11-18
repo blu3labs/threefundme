@@ -8,19 +8,30 @@ import {
   ScrollBox,
 } from "@ensdomains/thorin";
 import user from "../../../assets/user.svg";
-function ChatCard() {
+import { IoMdClose } from "react-icons/io";
+
+function ChatCard({ setChatOpen }) {
   return (
     <Card
       style={{
         width: "25rem",
         height: "30rem",
         justifyContent: "space-between",
+        alignItems: "flex-end",
         gap: "0rem",
+        position: "relative",
       }}
     >
-      <ScrollBox style={{
-        height: "23rem",
-      }}>
+      <div className="closebutton" onClick={() => setChatOpen(false)}>
+        <IoMdClose />
+      </div>
+
+      <ScrollBox
+        style={{
+          height: "23rem",
+          marginTop: "1rem",
+        }}
+      >
         {[...Array(10)].map((e, i) => {
           return (
             <div className="chatTextContainer">
@@ -45,7 +56,6 @@ function ChatCard() {
       <div className="chatInputContainer">
         <Input
           placeholder="Text..."
-          size="small"
           maxLength={100}
           style={{
             gap: "0rem",

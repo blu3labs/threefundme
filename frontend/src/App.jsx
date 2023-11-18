@@ -17,7 +17,6 @@ function App() {
   return (
     <BrowserRouter>
       <div className="appContainer">
-        sss
         <Header />
         <Routes>
           <Route path="/" element={<Home />} />

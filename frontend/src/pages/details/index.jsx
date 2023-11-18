@@ -18,6 +18,8 @@ import { FaTelegramPlane } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import PostCard from "./components/postCard";
 import ChatCard from "./components/chatCard";
+import { IoChatbubble } from "react-icons/io5";
+
 function Details() {
   const dummyArray = [
     {
@@ -100,6 +102,7 @@ function Details() {
   const [modalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState();
   const [filePreview, setFilePreview] = useState();
+  const [chatOpen, setChatOpen] = useState(false);
   const convertPreview = () => {
     if (file) {
       const reader = new FileReader();
@@ -250,7 +253,7 @@ function Details() {
                 </div>
               </div>
             </div>
-            <ScrollBox style={{ height: "200px" }}>
+            <ScrollBox style={{ height: "150px" }}>
               <Typography fontVariant="small">
                 Lorem ipsum dolor sit amet consectetur adipisicing elit.
                 Repudiandae laboriosam soluta in. Doloribus fugit veniam ratione
@@ -379,7 +382,13 @@ function Details() {
         </div>
       </div>
       <div className="chatContainer">
-        <ChatCard />
+        {chatOpen ? (
+          <ChatCard setChatOpen={setChatOpen} />
+        ) : (
+          <div className="chatOpenButton" onClick={() => setChatOpen(true)}>
+            <IoChatbubble />
+          </div>
+        )}
       </div>
     </div>
   );
