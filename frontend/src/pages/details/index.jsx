@@ -48,6 +48,35 @@ import { v4 as uuid, v4 } from "uuid";
 import { bootstrap } from "@libp2p/bootstrap";
 import { wakuDnsDiscovery } from "@waku/dns-discovery";
 import { apeCoinAddresses } from "../../contracts/ape";
+import toast from "react-hot-toast"
+
+
+
+/**
+ *    error NoStepFound(uint stepId);
+    error StepExpired(uint stepId);
+    error OnlyCurrentStep(uint stepId);
+    error CompaignNotAvailable();
+    error PostsAlreadyPublished(uint stepId);
+    error StepNotAvailableForContribution(uint stepId);
+    error NoEnoughPosts(uint stepId);
+    error StepCantSwitch(uint stepId);
+    error ContributionNotFound(address contributor, uint stepId);
+
+ */
+const errorDefinition = {
+  "StepCantSwitch": "Step can't switch because of time not expired or amount not collected",
+  "NoStepFound": "No step found",
+  "StepExpired": "Step expired",
+  "OnlyCurrentStep": "Only current step",
+  "CompaignNotAvailable": "Compaign not available",
+  "PostsAlreadyPublished": "Posts already published",
+  "StepNotAvailableForContribution": "Step not available for contribution",
+  "NoEnoughPosts": "No enough posts",
+  "ContributionNotFound": "Contribution not found",
+
+
+}
 
 function Details() {
   const compaignAddress = window.location.pathname.split("details/")[1];
@@ -212,6 +241,24 @@ function Details() {
     convertPreview();
   }, [file]);
   const [ownerLoading, setOwnerLoading] = useState(false);
+
+  const  getCustomError = (errorCode, compaignAbi) => {
+    const interfaceFunc = new ethers.utils.Interface(compaignAbi)
+    for ( let errorName of Object.keys(interfaceFunc.errors)) {
+      // test each error
+      try {
+      
+        const decoded = interfaceFunc.decodeErrorResult(
+          errorName,
+          errorCode
+        )
+        return {...decoded, name: errorName.slice(0,errorName.indexOf("("))}
+      }catch(err){
+        console.log(err)
+        
+      }
+    }
+  }
   const handleOwnerFunctions = async (method) => {
     try {
       setOwnerLoading(true);
@@ -223,10 +270,30 @@ function Details() {
         method: method,
         switchNetworkAsync: switchNetworkAsync,
       });
-      await tx.wait();
+
+
+      let errorCode = tx.error?.data?.originalError?.data
+      if (errorCode) {
+
+
+      let errorData = getCustomError(errorCode, compaignAbi)
+
+      console.log("resultt error"  ,errorData)
+      toast.error(errorDefinition[errorData.name])
+      }
+
+
+      // const decoded = interfaceFunc.decodeErrorResult(
+      //   interfaceFunc.errors['StepCantSwitch(uint256)'],
+      //   errorCode
+      // )
+
+  
+
       setOwnerLoading(false);
     } catch (error) {
       console.log(error);
+      toast.error(error.reason)
       setOwnerLoading(false);
     }
   };
@@ -243,6 +310,15 @@ function Details() {
         args: [ethers.utils.parseEther(amount?.toString() || "0")],
         switchNetworkAsync: switchNetworkAsync,
       });
+      let errorCode = tx.error?.data?.originalError?.data
+      if (errorCode) {
+
+
+      let errorData = getCustomError(errorCode, compaignAbi)
+
+      console.log("resultt error"  ,errorData)
+      toast.error(errorDefinition[errorData.name])
+      }
       await tx.wait();
       setContributeLoading(false);
     } catch (error) {
@@ -262,6 +338,15 @@ function Details() {
         method: "withdraw",
         switchNetworkAsync: switchNetworkAsync,
       });
+      let errorCode = tx.error?.data?.originalError?.data
+      if (errorCode) {
+
+
+      let errorData = getCustomError(errorCode, compaignAbi)
+
+      console.log("resultt error"  ,errorData)
+      toast.error(errorDefinition[errorData.name])
+      }
       await tx.wait();
 
       setWithdrawLoading(false);
