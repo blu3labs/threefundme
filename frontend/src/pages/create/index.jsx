@@ -17,6 +17,7 @@ import {
   useNetwork,
   useWalletClient,
   useSwitchNetwork,
+  erc20ABI,
 } from "wagmi";
 import { toast } from "react-hot-toast";
 import { writeContract } from "../../utils/writeContract";
@@ -27,6 +28,7 @@ import {
 import { walletClientToSigner } from "../../utils/walletConnectToSigner";
 import { addFile } from "../../utils/addFileHook";
 import { apeCoinAddresses } from "../../contracts/ape";
+import rpc from "../../utils/rpc.json";
 function Create() {
   const { switchNetworkAsync } = useSwitchNetwork();
   const { address } = useAccount();
@@ -138,6 +140,52 @@ function Create() {
       console.log(error);
     }
   };
+
+  const [userBalance, setUserBalance] = useState();
+  const fethcUserAllowance = async () => {
+    try {
+      const provider = new ethers.providers.JsonRpcProvider(rpc[chain?.id]);
+      console.log(apeCoinAddresses[chain?.id], "apeCoinAddress");
+      const contract = new ethers.Contract(
+        apeCoinAddresses[chain?.id],
+        erc20ABI,
+        provider
+      );
+      const balance = await contract.balanceOf(address);
+      const allowance = await contract.allowance(
+        address,
+        compaignFactoryAddress[chain?.id]
+      );
+      setUserBalance({
+        balance: ethers.utils.formatEther(balance),
+        allowance: ethers.utils.formatEther(allowance),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fethcUserAllowance();
+  }, [address, chain]);
+  console.log(userBalance, "userBalance");
+  const approve = async () => {
+    try {
+      const signer = walletClientToSigner(walletCl);
+      const contract = new ethers.Contract(
+        apeCoinAddresses[chain?.id],
+        erc20ABI,
+        signer
+      );
+      const tx = await contract.approve(
+        compaignFactoryAddress[chain?.id],
+        ethers.utils.parseEther(userBalance?.balance?.toString())
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="createContainer">
       <Card

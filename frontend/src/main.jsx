@@ -7,7 +7,7 @@ import { ThorinGlobalStyles, lightTheme, darkTheme } from "@ensdomains/thorin";
 import { createWeb3Modal, defaultWagmiConfig } from "@web3modal/wagmi/react";
 
 import { WagmiConfig } from "wagmi";
-import { bscTestnet, scroll, scrollTestnet, scrollSepolia } from "wagmi/chains";
+import { bscTestnet, scroll, scrollTestnet, sepolia } from "wagmi/chains";
 
 const projectId = "149f5175dc4a4bc3d18eb9a1792c2ecc";
 
@@ -19,7 +19,7 @@ const metadata = {
   icons: ["https://avatars.githubusercontent.com/u/37784886"],
 };
 
-const chains = [bscTestnet, scroll, scrollTestnet, scrollSepolia];
+const chains = [bscTestnet, scroll, scrollTestnet, sepolia];
 const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
 createWeb3Modal({ wagmiConfig, projectId, chains });

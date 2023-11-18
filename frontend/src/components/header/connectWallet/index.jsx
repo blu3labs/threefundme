@@ -15,7 +15,7 @@ function ConnectWallet() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
   const { chain } = useNetwork();
-  const availableChains = [97, 534352, 534353];
+  const availableChains = [97, 534352, 11155111];
   const [isAvailable, setIsAvailable] = useState(false);
   useEffect(() => {
     if (availableChains.includes(chain?.id)) {
@@ -28,6 +28,7 @@ function ConnectWallet() {
     97: "https://logowik.com/content/uploads/images/binance-smart-chain3412.logowik.com.webp",
     534352: scrollLogo,
     534353: scrollLogo,
+    11155111: scrollLogo,
   };
   return (
     <div>

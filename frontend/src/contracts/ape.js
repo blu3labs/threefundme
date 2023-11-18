@@ -1,5 +1,5 @@
 export const apeCoinAddresses = {
-    534353: "0x07995C256513Ef324Cd87485F303b4Fc69bE92e9",
+  11155111: "0x07995C256513Ef324Cd87485F303b4Fc69bE92e9",
 };
 
 export const apeCoinAbi = [
