@@ -15,7 +15,7 @@ contract CompaignFactoryManager is Ownable {
     mapping(address => address[]) public compaignsOfOwner; // owner => array of compaign
     mapping(address => bool) public factories;
     mapping(address => bool) public compaignValid;
-    mapping(address => address[]) public contributorsOfUsers;
+    mapping(address => address[]) public contributionsOfUsers;
     mapping(address => address[]) public contributionsOfCompaign;
     EnumerableSet.AddressSet compaignList;
 
@@ -23,7 +23,7 @@ contract CompaignFactoryManager is Ownable {
 
 
     event CompaignCreated(address indexed compaign, address indexed owner);
-    event CompaignContributionReceived(address indexed compaign, address indexed contributor, uint amount);
+    event CompaignContributionReceived(address indexed compaign, address indexed contributor);
     constructor()  public {
 
     }
@@ -78,13 +78,13 @@ contract CompaignFactoryManager is Ownable {
         list[contributionsOfUsers[user].length] = compaign;
         contributionsOfUsers[user] = list;
 
-        address[] memory list2 = new address[](contributorsOfCompaign[compaign].length + 1);
-        for(uint i = 0; i < contributorsOfCompaign[compaign].length; i++) {
-            list2[i] = contributorsOfCompaign[compaign][i];
+        address[] memory list2 = new address[](contributionsOfCompaign[compaign].length + 1);
+        for(uint i = 0; i < contributionsOfCompaign[compaign].length; i++) {
+            list2[i] = contributionsOfCompaign[compaign][i];
         }
-        list2[contributorsOfCompaign[compaign].length] = user;
+        list2[contributionsOfCompaign[compaign].length] = user;
         contributionsOfCompaign[compaign] = list2;
-        emit CompaignContributionReceived(compaign, user, amount);
+        emit CompaignContributionReceived(compaign, user);
     }
 
     function removeContributionUser(address user, address compaign) external onlyCompaign {
@@ -127,9 +127,9 @@ contract CompaignFactoryManager is Ownable {
     // get contributions by compaign
 
     function getAllContributionsByCompaign(address compaign) external view returns(address[] memory) {
-        address[] memory list = new address[](contributionsOfCompaign.length);
+        address[] memory list = new address[](contributionsOfCompaign[compaign].length);
         uint index = 0;
-        for(uint i = 0; i < contributionsOfCompaign.length; i++) {
+        for(uint i = 0; i < contributionsOfCompaign[compaign].length; i++) {
             if (contributionsOfCompaign[compaign][i] == address(0)) {
                 continue;
             }
@@ -145,9 +145,9 @@ contract CompaignFactoryManager is Ownable {
     }
 
        function getAllContributionsByCompaign(address compaign, uint start, uint end) external view returns(address[] memory) {
-        address[] memory list = new address[](contributionsOfCompaign.length);
+        address[] memory list = new address[](contributionsOfCompaign[compaign].length);
         uint index = 0;
-        for(uint i = 0; i < contributionsOfCompaign.length; i++) {
+        for(uint i = 0; i < contributionsOfCompaign[compaign].length; i++) {
             if (contributionsOfCompaign[compaign][i] == address(0)) {
                 continue;
             }

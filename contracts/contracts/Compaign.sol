@@ -13,7 +13,7 @@ import "./interfaces/ICompaignFactoryManager.sol";
 
 
 
-contract Compaign is Initializable, ERC721Upgradeable {
+contract Compaign is  ERC721Upgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
     enum StatusCompaign {
         FAILED,
@@ -63,7 +63,7 @@ contract Compaign is Initializable, ERC721Upgradeable {
     mapping(address => uint) public contributorTokenId;
     mapping(uint => uint) public stepCollect;
     uint public currentStepStatus;
-    mapping(uint => mappin(uint => ICompaign.PostInfo)) public posts;
+    mapping(uint => mapping(uint => ICompaign.PostInfo)) public posts;
     mapping(uint => uint) public postsLengthForStep;
     mapping(uint => StepStateInfo) public stepStateInfo;
     mapping(uint => bool) public stepAmountCollected;
@@ -71,8 +71,8 @@ contract Compaign is Initializable, ERC721Upgradeable {
     uint public totalAmount;
     address public factoryManager;
 
-    modifier onlyBuyer {
-        require(hasContribute[msg.sender], "Only buyer can call this function");
+    modifier onlyBuyer(uint stepId) {
+        require(hasContribute[msg.sender][stepId], "Only buyer can call this function");
         _;
     }
     modifier onlyCompaignOwner() {
@@ -104,7 +104,7 @@ contract Compaign is Initializable, ERC721Upgradeable {
         }
     }
 
-    function makePost(uint stepId, string[] calldata postDetails) external onlyCompaign {
+    function makePost(uint stepId, string[] calldata postDetails) external onlyCompaignOwner {
        if (compaignDetails.steps.length < stepId) {
         revert ICompaign.NoStepFound(stepId);
        }
@@ -115,7 +115,7 @@ contract Compaign is Initializable, ERC721Upgradeable {
        if (block.timestamp > compaignDetails.steps[stepId].expireTime) {
          revert ICompaign.StepExpired(stepId);
        }
-       require(getStatusCompaigned() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS,"Compaign not available");
+       require(getStatusCompaign() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS,"Compaign not available");
         ICompaign.PostInfo memory postInfo = ICompaign.PostInfo({
             details: postDetails,
             timestamp: block.timestamp
@@ -161,7 +161,7 @@ contract Compaign is Initializable, ERC721Upgradeable {
         }
 
         
-        hasContribute[msg.sender] = true;
+        hasContribute[msg.sender][currentStepStatus] = true;
         ICompaignFactoryManager(factoryManager).registerContributionUser(msg.sender, address(this));
         totalAmount += amount;
         stepCollect[currentStepStatus] += amount;
@@ -195,7 +195,7 @@ contract Compaign is Initializable, ERC721Upgradeable {
         emit NextStepSwitch(compaignDetails.owner, currentStepStatus - 1, currentStepStatus);
     }
 
-   function withdraw() external  onlyBuyer {
+   function withdraw(uint stepId) external  onlyBuyer(stepId) {
         require(getStatusCompaign() == StatusCompaign.FAILED, "Compaign not failed");
         ICompaign.UserContribution memory userCont = userContributions[msg.sender][currentStepStatus];
         if (userCont.timestamp <= 0) {
@@ -218,6 +218,33 @@ contract Compaign is Initializable, ERC721Upgradeable {
     }
 
     // getters
+
+    // need to be tested
+    function getTotalParticipants() external view returns(UserContributionFullInfo[] memory) {
+        UserContributionFullInfo[] memory listContributions = new UserContributionFullInfo[](contributorsAddress.length());
+
+        // need to be optimized.
+        for(uint stepA = 0; stepA < compaignDetails.steps.length; stepA++) {
+            for(uint i = 0; i < contributorsAddress.length(); i++) {
+                address contributor = contributorsAddress.at(i);
+                ICompaign.UserContribution memory userCont = userContributions[contributor][stepA];
+
+                if (userCont.timestamp <= 0) {
+                    continue;
+                }
+                UserContributionFullInfo memory full = UserContributionFullInfo({
+                    amount: userCont.amount,
+                    contributor: contributor,
+                    timestamp: userCont.timestamp,
+                    stepId: stepA
+                });
+
+                listContributions[i] = full;
+            }
+        }
+
+        return listContributions;
+    }
 
 
 }
