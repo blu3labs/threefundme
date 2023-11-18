@@ -23,7 +23,7 @@ The compaign will manage all the logic of the compaign, the compaign will be cre
 
 
 
-# Deployments
+# Chain Deployments
 
 
 ## Scroll Testnet
@@ -46,3 +46,9 @@ ApeCoin deployed at:  0x428b3e7a4064386f520118317D98e9B87E52815D
 FactoryManager deployed at:  0x7A47cbb1952aB28D3fd011fA01A201820F4354F3
 Compaign deployed at:  0xB6eFC6c0c07F9b796bF52975Af7CB33Edad6f215
 Factory deployed at:  0x65A7e46F1Db0A03f96d6B2eE37622D78e1A00029
+
+# TheGraph Deployment
+
+## Ethereum Sepolia Testnet
+
+Link https://api.studio.thegraph.com/query/58755/threefundme/version/latest
