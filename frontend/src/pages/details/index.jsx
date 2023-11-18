@@ -17,6 +17,7 @@ import { TfiWorld } from "react-icons/tfi";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
 import PostCard from "./components/postCard";
+import ChatCard from "./components/chatCard";
 function Details() {
   const dummyArray = [
     {
@@ -376,6 +377,9 @@ function Details() {
             })}
           </div>
         </div>
+      </div>
+      <div className="chatContainer">
+        <ChatCard />
       </div>
     </div>
   );
