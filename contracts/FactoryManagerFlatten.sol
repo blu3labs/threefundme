@@ -641,7 +641,7 @@ contract CompaignFactoryManager is Ownable {
         return officialList;
     }
 
-       function getAllContributionsByCompaign(address compaign, uint start, uint end) external view returns(address[] memory) {
+       function getAllContributionsByCompaignByStartEnd(address compaign, uint start, uint end) external view returns(address[] memory) {
         address[] memory list = new address[](contributionsOfCompaign[compaign].length);
         uint index = 0;
         for(uint i = 0; i < contributionsOfCompaign[compaign].length; i++) {

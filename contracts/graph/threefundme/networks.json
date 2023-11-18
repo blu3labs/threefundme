@@ -1,0 +1,8 @@
+{
+  "sepolia": {
+    "CompaignFactoryManager": {
+      "address": "0x7A47cbb1952aB28D3fd011fA01A201820F4354F3",
+      "startBlock": 4717393
+    }
+  }
+}
