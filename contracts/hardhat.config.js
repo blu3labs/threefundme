@@ -17,6 +17,10 @@ module.exports = {
       url:"https://testnet.era.zksync.dev",
       accounts: accountConfig
     },
+    bscTestnet:{
+      url:"https://data-seed-prebsc-1-s1.binance.org:8545",
+      accounts: accountConfig
+    },
     celoTestnet:{
       url:"https://alfajores-forno.celo-testnet.org",
       accounts: accountConfig

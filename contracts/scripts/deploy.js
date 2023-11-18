@@ -10,11 +10,36 @@ require("dotenv").config()
 async function main() {
 
   // create factory manager
+  
+  console.log("Deployment started..")
+  let apecoin = await hre.ethers.getContractFactory("Ape")
+  apecoin = await apecoin.deploy("APE","APE","10000000000000000000000000000000")
 
-  // setup currency
-  // setup fee
-  // deploy compaign logic
-  // create factory
+  console.log("ApeCoin deployed at: ", apecoin.address)
+  let factoryManager = await hre.ethers.getContractFactory("CompaignFactoryManager")
+
+  factoryManager = await factoryManager.deploy()
+
+  console.log("FactoryManager deployed at: ", factoryManager.address)
+
+  let factory = await hre.ethers.getContractFactory("CompaignFactory")
+
+  let impl = await hre.ethers.getContractFactory("Compaign")
+
+  impl = await impl.deploy()
+
+  console.log("Compaign deployed at: ", impl.address)
+  factory = await factory.deploy(impl.address, factoryManager.address)
+
+  console.log("Factory deployed at: ", factory.address)
+
+  await factoryManager.setFee(apecoin.address, "10000000")
+  await factoryManager.setFeeAddress(process.env.FEE_ADDRESS)
+  await factoryManager.setAllowedTokenCurrency(apecoin.address, true)
+  await  factoryManager.setFactory(factory.address, true)
+
+  console.log("FactoryManager configured")
+  console.log("Deployment finished");
 
   
 
