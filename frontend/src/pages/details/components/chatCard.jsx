@@ -6,6 +6,7 @@ import {
   Typography,
   AeroplaneSVG,
   ScrollBox,
+  Spinner,
 } from "@ensdomains/thorin";
 import user from "../../../assets/user.svg";
 import { IoMdClose } from "react-icons/io";
@@ -17,6 +18,7 @@ function ChatCard({
   chatContent,
   setChatContent,
   details,
+  wakuStatus,
 }) {
   const { address } = useAccount();
   return (
@@ -36,67 +38,75 @@ function ChatCard({
         </Typography>
         <IoMdClose />
       </div>
-      <ScrollBox
-        style={{
-          height: "23rem",
-          width: "100%",
-          marginTop: "1rem",
-        }}
-      >
-        {messages.map((e, i) => {
-          const owner = e.address === address;
-          return (
-            <div
-              className="chatTextContainer"
-              style={{
-                justifyContent: owner && "flex-start",
-                flexDirection: owner && "row-reverse",
+      {wakuStatus === "Connected" ? (
+        <>
+          <ScrollBox
+            style={{
+              height: "23rem",
+              width: "100%",
+              marginTop: "1rem",
+            }}
+          >
+            {messages.map((e, i) => {
+              const owner = e.address === address;
+              return (
+                <div
+                  className="chatTextContainer"
+                  style={{
+                    justifyContent: owner && "flex-start",
+                    flexDirection: owner && "row-reverse",
+                  }}
+                  key={i}
+                >
+                  <div
+                    style={{
+                      width: "3rem",
+                      flexDirection: "column",
+                      fontSize: "0.5rem",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <Avatar src={user} />
+                    {e.address.slice(0, 4) + "..." + e.address.slice(-4)}
+                  </div>
+                  <Typography fontVariant="extraSmall">{e.text}</Typography>
+                </div>
+              );
+            })}
+          </ScrollBox>
+          <div className="chatInputContainer">
+            <Input
+              placeholder="Text..."
+              size="small"
+              value={chatContent}
+              onChange={(e) => {
+                setChatContent(e.target?.value);
               }}
-              key={i}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  onSendMessage(chatContent);
+                }
+              }}
+              maxLength={100}
+              style={{
+                gap: "0rem",
+              }}
+            />
+            <div
+              className="sendButton"
+              onClick={(e) => {
+                onSendMessage(chatContent);
+              }}
             >
-              <div
-                style={{
-                  width: "3rem",
-                  flexDirection: "column",
-                  fontSize: "0.5rem",
-                  alignItems: "flex-start",
-                }}
-              >
-                <Avatar src={user} />
-                {e.address.slice(0, 4) + "..." + e.address.slice(-4)}
-              </div>
-              <Typography fontVariant="extraSmall">{e.text}</Typography>
+              <AeroplaneSVG />
             </div>
-          );
-        })}
-      </ScrollBox>
-      <div className="chatInputContainer">
-        <Input
-          placeholder="Text..."
-          size="small"
-          value={chatContent}
-          onChange={(e) => {
-            setChatContent(e.target?.value);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onSendMessage(chatContent);
-            }
-          }}
-          maxLength={100}
-          style={{
-            gap: "0rem",
-          }}
-        />
-        <div
-          className="sendButton"
-          onClick={(e) => {
-            onSendMessage(chatContent);
-          }}
-        >
-          <AeroplaneSVG />
+          </div>
+        </>
+      ) : (
+        <div className="wakuLoading">
+          <Spinner />
         </div>
-      </div>
+      )}
     </Card>
   );
 }

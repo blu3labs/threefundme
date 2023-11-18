@@ -74,7 +74,7 @@ function Home() {
           allSteps: allSteps,
         });
       }
-      setAllCompaigns(formatData);
+      setAllCompaigns(formatData.reverse());
     } catch (error) {
       console.log(error);
     }

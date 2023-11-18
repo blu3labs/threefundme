@@ -54,20 +54,19 @@ export const writeContract = async (data) => {
 
     return receipt;
   } catch (error) {
-    console.log(error);
-    // toast.error(
-    //   error
-    //     ? error.reason !== undefined
-    //       ? error.reason?.includes("execution reverted")
-    //         ? error.reason?.split("execution reverted:")[1]
-    //         : error.reason
-    //       : error.message !== undefined
-    //       ? error.message === "Internal JSON-RPC error."
-    //         ? "Insufficient Balance"
-    //         : error.message
-    //       : "Something went wrong"
-    //     : "Something went wrong"
-    // );
+    toast.error(
+      error
+        ? error.reason !== undefined
+          ? error.reason?.includes("execution reverted")
+            ? error.reason?.split("execution reverted:")[1]
+            : error.reason
+          : error.message !== undefined
+          ? error.message === "Internal JSON-RPC error."
+            ? "Insufficient Balance"
+            : error.message
+          : "Something went wrong"
+        : "Something went wrong"
+    );
     toast.dismiss(loadToast);
     return error;
   }

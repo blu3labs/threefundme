@@ -74,7 +74,6 @@ function Create() {
       setLogoPreview(null);
     }
   };
-  console.log(bannerPreview, "logoPreview", banner);
   useEffect(() => {
     convertPreview();
     convertlogoPreview();
@@ -93,6 +92,7 @@ function Create() {
       date: "",
     },
   ]);
+  console.log(stepArray, "stepArray")
   const [loading, setLoading] = useState();
   const handleCreate = async () => {
     try {
@@ -186,7 +186,6 @@ function Create() {
   useEffect(() => {
     fethcUserAllowance();
   }, [address, chain]);
-  console.log(userBalance, "userBalance");
   const approve = async () => {
     try {
       setLoading(true);
@@ -505,10 +504,10 @@ function Create() {
                   placeholder="Expired Date"
                   label="Date"
                   suffix="Date"
-                  value={stepArray[index].title}
+                  value={stepArray[index].date}
                   onChange={(e) => {
                     let copyArray = [...stepArray];
-                    copyArray[index].title = e.target.value;
+                    copyArray[index].date = e.target.value;
                     setStepArray(copyArray);
                   }}
                   type="datetime-local"

@@ -48,9 +48,7 @@ import { v4 as uuid, v4 } from "uuid";
 import { bootstrap } from "@libp2p/bootstrap";
 import { wakuDnsDiscovery } from "@waku/dns-discovery";
 import { apeCoinAddresses } from "../../contracts/ape";
-import toast from "react-hot-toast"
-
-
+import toast from "react-hot-toast";
 
 /**
  *    error NoStepFound(uint stepId);
@@ -65,18 +63,17 @@ import toast from "react-hot-toast"
 
  */
 const errorDefinition = {
-  "StepCantSwitch": "Step can't switch because of time not expired or amount not collected",
-  "NoStepFound": "No step found",
-  "StepExpired": "Step expired",
-  "OnlyCurrentStep": "Only current step",
-  "CompaignNotAvailable": "Compaign not available",
-  "PostsAlreadyPublished": "Posts already published",
-  "StepNotAvailableForContribution": "Step not available for contribution",
-  "NoEnoughPosts": "No enough posts",
-  "ContributionNotFound": "Contribution not found",
-
-
-}
+  StepCantSwitch:
+    "Step can't switch because of time not expired or amount not collected",
+  NoStepFound: "No step found",
+  StepExpired: "Step expired",
+  OnlyCurrentStep: "Only current step",
+  CompaignNotAvailable: "Compaign not available",
+  PostsAlreadyPublished: "Posts already published",
+  StepNotAvailableForContribution: "Step not available for contribution",
+  NoEnoughPosts: "No enough posts",
+  ContributionNotFound: "Contribution not found",
+};
 
 function Details() {
   const compaignAddress = window.location.pathname.split("details/")[1];
@@ -117,6 +114,7 @@ function Details() {
         compaignAddress,
         ethers.constants.MaxUint256
       );
+      await tx.wait();
       await fethcUserAllowance();
       setContributeLoading(false);
     } catch (error) {
@@ -139,7 +137,7 @@ function Details() {
       );
       const start = new Date().getTime();
       const compaignDetails = await contract.getCompaignInfo();
-
+      console.log(compaignDetails, "compaignDetails");
       let allSteps = [];
       let posts = [];
       let stepsPosts = [];
@@ -167,9 +165,14 @@ function Details() {
           count: steps["posts"]?.length,
         });
       }
+      let allStepsAmount = [];
+      for (let step of compaignDetails["compaign"]["steps"]) {
+        allStepsAmount.push(step["amountToBeRaised"]?.toString());
+      }
       setDetails({
         posts: posts,
         stepsPosts: stepsPosts,
+        allStepsAmount: allStepsAmount,
         address: compaignAddress,
         id: compaignDetails["id"],
         totalAmount: compaignDetails["totalAmount"]?.toString(),
@@ -195,7 +198,7 @@ function Details() {
       console.log(error);
     }
   };
-  console.log(details,"details")
+  console.log(details, "details");
   const [isContribute, setisContribute] = useState(false);
   const hasContribute = async (id) => {
     try {
@@ -204,9 +207,14 @@ function Details() {
         compaignAbi,
         provider
       );
-      const tx = await contract.hasContribute(address, id);
-      setisContribute(tx);
-      console.log(tx, "hasContribute");
+      const tx = await contract.getTotalParticipants();
+      for (let a of tx) {
+        if (a["contributor"].toLowerCase() == address.toLowerCase()) {
+          setisContribute(true);
+          return;
+        }
+      }
+      setisContribute(false);
     } catch (error) {
       console.log(error, "error");
     }
@@ -242,23 +250,18 @@ function Details() {
   }, [file]);
   const [ownerLoading, setOwnerLoading] = useState(false);
 
-  const  getCustomError = (errorCode, compaignAbi) => {
-    const interfaceFunc = new ethers.utils.Interface(compaignAbi)
-    for ( let errorName of Object.keys(interfaceFunc.errors)) {
+  const getCustomError = (errorCode, compaignAbi) => {
+    const interfaceFunc = new ethers.utils.Interface(compaignAbi);
+    for (let errorName of Object.keys(interfaceFunc.errors)) {
       // test each error
       try {
-      
-        const decoded = interfaceFunc.decodeErrorResult(
-          errorName,
-          errorCode
-        )
-        return {...decoded, name: errorName.slice(0,errorName.indexOf("("))}
-      }catch(err){
-        console.log(err)
-        
+        const decoded = interfaceFunc.decodeErrorResult(errorName, errorCode);
+        return { ...decoded, name: errorName.slice(0, errorName.indexOf("(")) };
+      } catch (err) {
+        console.log(err);
       }
     }
-  }
+  };
   const handleOwnerFunctions = async (method) => {
     try {
       setOwnerLoading(true);
@@ -271,29 +274,23 @@ function Details() {
         switchNetworkAsync: switchNetworkAsync,
       });
 
-
-      let errorCode = tx.error?.data?.originalError?.data
+      let errorCode = tx.error?.data?.originalError?.data;
       if (errorCode) {
+        let errorData = getCustomError(errorCode, compaignAbi);
 
-
-      let errorData = getCustomError(errorCode, compaignAbi)
-
-      console.log("resultt error"  ,errorData)
-      toast.error(errorDefinition[errorData.name])
+        console.log("resultt error", errorData);
+        toast.error(errorDefinition[errorData.name]);
       }
-
 
       // const decoded = interfaceFunc.decodeErrorResult(
       //   interfaceFunc.errors['StepCantSwitch(uint256)'],
       //   errorCode
       // )
 
-  
-
       setOwnerLoading(false);
     } catch (error) {
       console.log(error);
-      toast.error(error.reason)
+      toast.error(error.reason);
       setOwnerLoading(false);
     }
   };
@@ -310,14 +307,12 @@ function Details() {
         args: [ethers.utils.parseEther(amount?.toString() || "0")],
         switchNetworkAsync: switchNetworkAsync,
       });
-      let errorCode = tx.error?.data?.originalError?.data
+      let errorCode = tx.error?.data?.originalError?.data;
       if (errorCode) {
+        let errorData = getCustomError(errorCode, compaignAbi);
 
-
-      let errorData = getCustomError(errorCode, compaignAbi)
-
-      console.log("resultt error"  ,errorData)
-      toast.error(errorDefinition[errorData.name])
+        console.log("resultt error", errorData);
+        toast.error(errorDefinition[errorData.name]);
       }
       await tx.wait();
       setContributeLoading(false);
@@ -338,14 +333,12 @@ function Details() {
         method: "withdraw",
         switchNetworkAsync: switchNetworkAsync,
       });
-      let errorCode = tx.error?.data?.originalError?.data
+      let errorCode = tx.error?.data?.originalError?.data;
       if (errorCode) {
+        let errorData = getCustomError(errorCode, compaignAbi);
 
-
-      let errorData = getCustomError(errorCode, compaignAbi)
-
-      console.log("resultt error"  ,errorData)
-      toast.error(errorDefinition[errorData.name])
+        console.log("resultt error", errorData);
+        toast.error(errorDefinition[errorData.name]);
       }
       await tx.wait();
 
@@ -417,7 +410,6 @@ function Details() {
             <video
               src={filePreview}
               controls
-              preload="auto"
               style={{
                 height: "200px",
                 objectFit: "cover",
@@ -511,7 +503,7 @@ function Details() {
       })
       .catch((err) => console.log(err));
   }, []);
-
+  console.log(wakuStatus,"wakuStatus")
   useEffect(() => {
     if (!waku) return;
 
@@ -522,6 +514,7 @@ function Details() {
       .then(() => {
         // We are now connected to a store node
         setWakuStatus("Connected");
+        console.log("connected to store node");
       })
       .catch((err) => {
         console.log("error waiting peer", err);
@@ -571,6 +564,7 @@ function Details() {
             if (!decoded) {
               return;
             }
+            setWakuStatus("Connected");
             return decoded;
           })
         );
@@ -627,7 +621,12 @@ function Details() {
     setChatContent("");
   };
   const percentage =
-    (details?.totalAmount / 10 ** 18 / (details?.totalPrice / 10 ** 18)) * 100;
+    ((details?.totalAmount / 10 ** 18 )/ (details?.totalPrice / 10 ** 18)) * 100;
+  const activeStepPercentage =
+    ((details?.allSteps[details?.currentStatus]?.currentAmount /
+      10 ** 18) /
+      (details?.allStepsAmount[details?.currentStatus] / 10 ** 18)) *
+    100;
   return (
     <div className="detailsWrapper">
       {modalOpen && AddPostModal()}
@@ -732,14 +731,14 @@ function Details() {
               </Typography>
             </div>
             <div className="fundInfoContent">
-              <Typography fontVariant="smallBold">Active Steps</Typography>
+              <Typography fontVariant="smallBold">Active Step</Typography>
               <Typography fontVariant="small">
                 {Number(details?.currentStatus) + 1}
               </Typography>
             </div>
             <div className="fundInfoContent">
               <Typography fontVariant="smallBold">
-                Active Steps Countdown
+                Active Step Countdown
               </Typography>
               <Typography fontVariant="small">
                 {details && (
@@ -756,17 +755,38 @@ function Details() {
             </div>
 
             <div className="progressBarContainer">
+              <Typography fontVariant="small">Total</Typography>
               <div className="progressBar">
                 <div
                   className="progressBarContent"
                   style={{
-                    width: `${percentage}%`,
+                    width: `${percentage > 100 ? 100 : percentage}%`,
                   }}
                 ></div>
               </div>
               <div className="progressBarBottom">
                 {details?.totalAmount / 10 ** 18} Ape
                 <span>{details?.totalPrice / 10 ** 18} Ape</span>
+              </div>
+            </div>
+            <div className="progressBarContainer">
+              <Typography fontVariant="small">Step {details?.currentStatus}</Typography>
+              <div className="progressBar">
+                <div
+                  className="progressBarContent"
+                  style={{
+                    width: `${activeStepPercentage > 100 ? 100 : activeStepPercentage}%`,
+                  }}
+                ></div>
+              </div>
+              <div className="progressBarBottom">
+                {details?.allSteps[details?.currentStatus]?.currentAmount /
+                  10 ** 18}{" "}
+                Ape
+                <span>
+                  {details?.allStepsAmount[details?.currentStatus] / 10 ** 18}{" "}
+                  Ape
+                </span>
               </div>
             </div>
           </Card>
@@ -836,7 +856,7 @@ function Details() {
                     >
                       <div className="stepText">
                         <Typography fontVariant="smallBold">
-                          {e.step}
+                          {Number(e.step) + 1}
                         </Typography>
                       </div>
                     </div>
@@ -856,6 +876,7 @@ function Details() {
               chatContent={chatContent}
               setChatContent={setChatContent}
               messages={messagesChat}
+              wakuStatus={wakuStatus}
             />
           ) : (
             <div className="chatOpenButton" onClick={() => setChatOpen(true)}>
