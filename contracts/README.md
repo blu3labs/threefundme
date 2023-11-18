@@ -42,10 +42,10 @@ Factory deployed at:  0xe78737D86675aaac9Db96754917b493914b8a72a
 
 ## Ethereum Sepolia Testnet
 
-ApeCoin deployed at:  0x428b3e7a4064386f520118317D98e9B87E52815D
-FactoryManager deployed at:  0x7A47cbb1952aB28D3fd011fA01A201820F4354F3
-Compaign deployed at:  0xB6eFC6c0c07F9b796bF52975Af7CB33Edad6f215
-Factory deployed at:  0x65A7e46F1Db0A03f96d6B2eE37622D78e1A00029
+ApeCoin deployed at:  0x07995C256513Ef324Cd87485F303b4Fc69bE92e9
+FactoryManager deployed at:  0x003bf14a66D1C9DEcd54bECf7731af1B68383Db8
+Compaign deployed at:  0x3A5937B45BF491ed44a2e044c7BfaB40b4F24687
+Factory deployed at:  0x720558Bcf5eEc3D2B85685F83dC955302685d3ba
 
 # TheGraph Deployment
 
