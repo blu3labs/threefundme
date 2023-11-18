@@ -102,9 +102,123 @@ describe("Compaign", function() {
         tx = await compaign.switchStep()
         await tx.wait()
 
+        tx = await compaign.collectTokens()
+        await tx.wait()
+
+        let contrib2=  await compaign.contribute("10000000000000000000")
+
+        await contrib2.wait()
+
+        let post3 = await compaign.makePost(1,["Myyy second postt guys", "here we go"])
+        await post3.wait()
+        let post4 = await compaign.makePost(1,["Myyy second postt memoo", "here we go"])
+        await post4.wait()
+        let post5 = await compaign.makePost(1,["Myyy second postt memoo", "here we go"])
+        await post5.wait()
+        let info3 = await compaign.getCompaignInfo()
+        console.log(info3)
+
     })
 
 
 
-    it("Compaign fail")
+    it("Withdraw test",  async () => {
+        let step1expireWithdraw = ( Date.now() / 1000  + 2200).toFixed(0)
+
+        let step2expireWithdraw = ( Date.now() / 1000  + 8600).toFixed(0)
+
+        const compaignInfo = [
+          ["MyCompaign","compaign"],
+          [],
+          ape.address,
+          owner.address,
+          [
+            [
+            ["stepinfo"],
+            [],
+            step1expireWithdraw,
+            "10000000000000000000",
+          
+            ],
+            [
+              ["step2info"],
+              [],
+              step2expireWithdraw,
+              "30000000000000000000",
+
+              ],
+          ]
+        ]
+
+        let txapprov = await ape.approve(factory.address, "1500000000000000000000")
+        await txapprov.wait()
+        let tx = await factory.createCompaign(compaignInfo)
+       let result =  await tx.wait()
+
+
+
+       let compaign = await ethers.getContractAt("Compaign", result.events[result.events.length - 3].address)
+   
+
+    // let post = await compaign.makePost(0,["Myyy new postt guys", "here we go"])
+    // await post.wait()
+
+    // let post2 = await compaign.makePost(0,["Myyy second postt guys", "here we go"])
+    // await post2.wait()
+    let fac = await compaign.factoryManager()
+    console.log("fac ", fac)
+    let txapprov2 = await ape.approve(compaign.address, "1500000000000000000000")
+    await txapprov2.wait()
+    let info2 = await compaign.getCompaignInfo()
+    console.log("before fail", info2)
+
+    let contrib=  await compaign.contribute("1000000000000000000")
+
+   contrib=  await contrib.wait()
+    
+   console.log("contributed")
+
+   // batch of contrib
+   let txapprov3 = await ape.connect(addr1).approve(compaign.address, "1500000000000000000000")
+   await txapprov3.wait()
+   let contrib2=  await compaign.connect(addr1).contribute("1000000000000000000")
+
+   contrib2=  await contrib2.wait()
+   let txapprov4 = await ape.connect(addr2).approve(compaign.address, "1500000000000000000000")
+   await txapprov4.wait()
+
+   let contrib3=  await compaign.connect(addr2).contribute("1000000000000000000")
+
+   contrib3=  await contrib3.wait()
+    
+ 
+   console.log("contribution tx ", contrib)
+    await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step1expireWithdraw).add(1)));
+  
+ // should be failed now.
+
+ // try withdraw
+
+ let oldbal = await ape.balanceOf(owner.address)
+
+ let totalpart = await compaign.getTotalParticipants()
+ console.log(totalpart)
+ let usercontrib = await compaign.getUserContribution(0)
+ console.log("usercontrib ", usercontrib)
+ let infoo = await compaign.getCompaignInfo()
+   tx =  await compaign.withdraw(infoo.currentStatus) // stepid 
+   await tx.wait()
+
+
+ let newbal = await ape.balanceOf(owner.address)
+
+ console.log("old bal ", new BigNumber(oldbal._hex).div(10**18).toString(10), " new bal ", new BigNumber(newbal._hex).div(10**18).toString(10))
+
+
+    let info = await compaign.getCompaignInfo()
+    console.log(info,"info last")
+
+
+    expect(info.statusCompaign).to.be.equal(0)
+    })
 })
