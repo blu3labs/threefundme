@@ -30,12 +30,32 @@ import { walletClientToSigner } from "../../utils/walletConnectToSigner";
 import { writeContract } from "../../utils/writeContract";
 import { compaignAbi } from "../../contracts/compaign";
 import { addFile } from "../../utils/addFileHook";
+import protobuf from "protobufjs";
+import {
+  createLightNode,
+  waitForRemotePeer,
+  createDecoder,
+
+  bytesToUtf8,
+  createRelayNode,
+  Protocols,
+  createEncoder,
+} from "@waku/sdk";
+
+import { v4 as uuid, v4 } from 'uuid';
+import { bootstrap } from "@libp2p/bootstrap";
+import { wakuDnsDiscovery } from "@waku/dns-discovery";
+
+
+
 function Details() {
   const { address } = useAccount();
   const { chain } = useNetwork();
   const { data: walletCl } = useWalletClient();
   const { switchNetworkAsync } = useSwitchNetwork();
   const [amount, setAmount] = useState();
+  let id = "0xdsqdsdsqdqdsd"
+
   const dummyArray = [
     {
       step: "1",
@@ -283,6 +303,192 @@ function Details() {
     );
   };
 
+
+
+  // chat mechanism => Waku protocol
+
+
+  const contentTopic = "/threefundme/3/compaign/chat/" + id;
+
+
+  const encoder = createEncoder({ contentTopic });
+  const decoder = createDecoder(contentTopic);
+
+  const ProtoChatMessage = new protobuf.Type("ChatMessage")
+  .add(new protobuf.Field("id", 1,"string"))
+  .add(new protobuf.Field("timestamp", 2, "uint64"))
+  .add(new protobuf.Field("address", 3, "string"))
+  .add(new protobuf.Field("text", 4, "string"));
+
+  const [waku, setWaku] = React.useState(undefined);
+  const [wakuStatus, setWakuStatus] = React.useState("None");
+  const [messagesChat, setMessages] = React.useState([])
+  const [chatContent, setChatContent] = React.useState("")
+  useEffect(() => {
+    console.log(wakuStatus)
+
+
+    setWakuStatus("Starting");
+
+    // Define DNS node list
+  
+
+    console.log("starting")
+    createLightNode({
+      defaultBootstrap:true
+}
+      
+ ).then((waku) => {
+      console.log("createdé")
+
+      waku.start().then(() => {
+        setWaku(waku);
+        console.log("startedd")
+  
+        setWakuStatus("Connecting");
+
+      })
+    }).catch(err => console.log(err)) ;
+  }, []);
+
+   
+  useEffect(() => {
+    if (!waku) return;
+
+    // We do not handle disconnection/re-connection in this example
+    if (wakuStatus === "Connected") return;
+
+    console.log("wait peer")
+    waitForRemotePeer(waku, [Protocols.LightPush, Protocols.Store]).then(() => {
+      // We are now connected to a store node
+      console.log("Connected For lightpush and Store")
+      setWakuStatus("Connected");
+    }).catch((err) => {
+      console.log("error waiting peer", err)
+    });
+  }, [wakuStatus, waku]);
+
+
+  function decodeMessage(wakuMessage) {
+    if (!wakuMessage.payload) return;
+
+    const { id, timestamp, address, text } = ProtoChatMessage.decode(
+      wakuMessage.payload
+    );
+
+
+    if (!timestamp || !text || !address || !id) return;
+
+    const time = new Date();
+    time.setTime(Number(timestamp));
+
+
+
+    return {
+      text: text,
+      id,
+      timestamp,
+      address,
+      timestampInt: wakuMessage.timestamp,
+    };
+  }
+
+
+  const updateMessages =  (async () => {
+    const startTime = new Date();
+
+    // should be timestamp of compaign
+    startTime.setTime( 1700218136000);
+
+    
+
+    try {
+      
+      for await (const messagesPromises of waku.store.queryGenerator(
+        [decoder],
+        {
+
+          timeFilter: { startTime, endTime: new Date() },
+          pageDirection: "backward",
+
+        }
+      )) {
+        let messages = await Promise.all(
+          messagesPromises.map(async (p) => {
+
+            const msg = await p;
+            console.log("MESSAGE ", msg)
+
+            let decoded =  decodeMessage(msg);
+            if (!decoded) {
+              console.log("Failed to decode message");
+              return;
+            }
+            return decoded
+          })
+        );
+        console.log("messages received by peer ", messages)
+
+       
+    
+        // filter by unique id.
+        let messagesOfficial = []
+        messages = messages.concat(messagesChat)
+        messages.forEach((e) => {
+          if (messagesOfficial.filter((v) => v.id === e.id).length === 0 && e.id !== "109156be-c4fb-41ea-b1b4-efe1671c5836") {
+            messagesOfficial.push(e)
+          }
+        })
+        if (messagesOfficial.length <= 0) return;
+
+       messagesOfficial =  messagesOfficial.sort((a, b) => {
+          return a.timestamp > b.timestamp ? 1 : -1
+        })
+        
+        setMessages(messagesOfficial)
+     
+      }
+    } catch (e) {
+
+   
+    }
+  })
+
+  useEffect(() => {
+    if (wakuStatus !== "Connected") return;
+
+  
+
+    setInterval(  (async () => {
+      await updateMessages()
+    }), 2000)
+    updateMessages()
+  }, [wakuStatus]);
+
+
+  const sendMessage = async(text) => {
+    if (!waku) return;
+
+    const timestamp = new Date().getTime();
+    const message = {
+      timestamp,
+      address,
+      id: v4(),
+      text: text,
+    };
+    const createMessage = ProtoChatMessage.create(message)
+    const encoded = ProtoChatMessage.encode(createMessage).finish();
+
+    let tx = await waku.lightPush.send(encoder, {
+      payload: encoded,
+  });
+
+  
+  await updateMessages()
+  setChatContent("")
+ 
+  }
+
   return (
     <div className="detailsWrapper">
       {modalOpen && AddPostModal()}
@@ -493,7 +699,7 @@ function Details() {
       </div>
       <div className="chatContainer">
         {chatOpen ? (
-          <ChatCard setChatOpen={setChatOpen} />
+          <ChatCard setChatOpen={setChatOpen} onSendMessage={sendMessage} chatContent={chatContent} setChatContent={setChatContent}  messages={messagesChat} />
         ) : (
           <div className="chatOpenButton" onClick={() => setChatOpen(true)}>
             <IoChatbubble />
