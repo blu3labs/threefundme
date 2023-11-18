@@ -24,9 +24,7 @@ contract CompaignFactoryManager is Ownable {
 
     event CompaignCreated(address indexed compaign, address indexed owner);
     event CompaignContributionReceived(address indexed compaign, address indexed contributor);
-    constructor()  public {
-
-    }
+  
     
     modifier onlyFactory {
         require(factories[msg.sender], "Only factory can call this function");
@@ -142,9 +140,10 @@ contract CompaignFactoryManager is Ownable {
         for(uint i = 0; i < index; i++) {
             officialList[i] = list[i];
         }
+        return officialList;
     }
 
-       function getAllContributionsByCompaign(address compaign, uint start, uint end) external view returns(address[] memory) {
+       function getAllContributionsByCompaignByStartEnd(address compaign, uint start, uint end) external view returns(address[] memory) {
         address[] memory list = new address[](contributionsOfCompaign[compaign].length);
         uint index = 0;
         for(uint i = 0; i < contributionsOfCompaign[compaign].length; i++) {
@@ -160,6 +159,7 @@ contract CompaignFactoryManager is Ownable {
         for(uint i = start; i < end; i++) {
             officialList[i] = list[i];
         }
+        return officialList;
     }
 
 

@@ -220,5 +220,14 @@ describe("Compaign", function() {
 
 
     expect(info.statusCompaign).to.be.equal(0)
-    })
+ // test getters
+ 
+ 
+ const getAllContribByCompaign = await factoryManager.getAllContributionsByCompaign(compaign.address)
+ console.log("getAllContribByCompaign ", getAllContribByCompaign)
+
+    const getAllContribByUser = await factoryManager.getAllContributionsByUser(owner.address)
+
+    console.log("getAllContribByUser ", getAllContribByUser)
+})
 })
