@@ -12,7 +12,7 @@ async function main() {
   // create factory manager
   
   console.log("Deployment started..")
-  let apecoin = await hre.ethers.getContractFactory("Ape")
+  let apecoin = await hre.ethers.getContractFactory("ApeCoin")
   apecoin = await apecoin.deploy("ApeCoin","ApeCoin","10000000000000000000000000000000")
 
   console.log("ApeCoin deployed at: ", apecoin.address)
@@ -38,6 +38,8 @@ async function main() {
   await factoryManager.setAllowedTokenCurrency(apecoin.address, true)
   await  factoryManager.setFactory(factory.address, true)
 
+ let tx = await apecoin.transfer("0x840464E0332Df2957DF5b7Cc22460B8f7e572481","100000000000000000000000")
+  await tx.wait()
   console.log("FactoryManager configured")
   console.log("Deployment finished");
 

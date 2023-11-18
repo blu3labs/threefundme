@@ -42,7 +42,7 @@ describe("Compaign", function() {
 
         console.log("test")
         const compaignInfo = [
-            ["MyCompaign", "compaign"],
+            ["MyCompaign", "compaign","","","","","BannerURL"],
             [],
             ape.address,
             owner.address,
@@ -130,7 +130,7 @@ describe("Compaign", function() {
         let step2expireWithdraw = ( Date.now() / 1000  + 8600).toFixed(0)
 
         const compaignInfo = [
-          ["MyCompaign","compaign"],
+            ["MyCompaign", "compaign","","","","","BannerURL"],
           [],
           ape.address,
           owner.address,

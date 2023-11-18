@@ -87,7 +87,8 @@ contract Compaign is  ERC721Upgradeable {
         compaignDetails = info;
         factoryManager = factoryManager_;
         id = keccak256(abi.encodePacked(address(this), info.owner, keccak256(abi.encodePacked(block.timestamp, block.number))));
-
+        require(info.details.length > 6, "Please check the details of the compaign");
+        _createPost(info.details[6]);
     }  
 
     function transferFrom(address from, address to, uint tokenId) public override {
@@ -131,6 +132,19 @@ contract Compaign is  ERC721Upgradeable {
         emit PostPublished(postDetails[0], stepId);
 
 
+    }
+
+
+    function _createPost(string calldata bannerURL) private {
+           ICompaign.PostInfo memory postInfo = ICompaign.PostInfo({
+            details: new string[](1),
+            timestamp: block.timestamp
+        });
+
+        postInfo.details[0] = bannerURL;
+        
+        posts[currentStepStatus][postsLengthForStep[currentStepStatus] + 1] = postInfo;
+        postsLengthForStep[currentStepStatus]++;
     }
 
     function contribute(uint amount) external payable {
