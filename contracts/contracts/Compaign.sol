@@ -31,7 +31,7 @@ contract Compaign is  ERC721Upgradeable {
 
     struct CompaignFullInfo {
         ICompaign.CompaignInfo compaign;
-        uint currenStatus;
+        uint currentStatus;
         uint totalAmount;
         StatusCompaign statusCompaign;
         StepStateInfo[] allSteps;
@@ -246,5 +246,65 @@ contract Compaign is  ERC721Upgradeable {
         return listContributions;
     }
 
+    function getUserContributionByStartEnd(uint start, uint end, uint stepId ) external view returns(UserContributionFullInfo[] memory) {
+        UserContributionFullInfo[] memory listContributions = new UserContributionFullInfo[](end - start);
+        uint index = 0;
+        for (uint i = start; i < end; i++) {
+            address contributor = contributorsAddress.at(i);
+            ICompaign.UserContribution memory userCont = userContributions[contributor][stepId];
+            UserContributionFullInfo memory full = UserContributionFullInfo({
+                amount: userCont.amount,
+                contributor: contributor,
+                timestamp: userCont.timestamp,
+                stepId: stepId
+            });
+            listContributions[index] = full;
+            index++;
+        }
+        return listContributions;
+    }
+    
+    function getUserContribution(uint stepId) external view returns(UserContributionFullInfo[] memory) {
+        UserContributionFullInfo[] memory listContributions = new UserContributionFullInfo[](contributorsAddress.length());
+
+    
+        for (uint i = 0; i < contributorsAddress.length(); i++) {
+            address contributor = contributorsAddress.at(i);
+        
+
+            ICompaign.UserContribution memory userCont = userContributions[contributor][stepId];
+            UserContributionFullInfo memory full = UserContributionFullInfo({
+                amount: userCont.amount,
+                contributor: contributor,
+                timestamp: userCont.timestamp,
+                stepId: stepId
+            });
+            listContributions[i] = full;
+         
+        }
+
+        return listContributions;
+    }
+    
+    function getCompaignInfo() external view returns(CompaignFullInfo memory) {
+        ICompaign.PostInfo[] memory listPosts = new ICompaign.PostInfo[](postsLengthForStep[currentStepStatus]);
+        for(uint i = 0; i < postsLengthForStep[currentStepStatus]; i++) {
+            listPosts[i] = posts[currentStepStatus][i + 1];
+        }
+
+        StepStateInfo[] memory listSteps =  new StepStateInfo[](compaignDetails.steps.length);
+        for(uint i = 0; i < compaignDetails.steps.length; i++) {
+            listSteps[i] = stepStateInfo[i];
+        }
+        CompaignFullInfo memory full = CompaignFullInfo({
+            compaign: compaignDetails,
+            currentStatus: currentStepStatus,
+            totalAmount: totalAmount,
+            statusCompaign: getStatusCompaign(),
+            allSteps: listSteps
+
+        });
+        return full;
+    }
 
 }

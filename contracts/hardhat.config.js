@@ -42,10 +42,12 @@ module.exports = {
 
       
         version:"0.8.20",
-        optimizer:{
-          enabled:true,
-          runs:200
-        }
+        settings: {
+          optimizer:{
+            enabled:true,
+            runs:200
+          }
+      }
       
   }
 };

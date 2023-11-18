@@ -44,7 +44,7 @@ contract CompaignFactory is Initializable, ReentrancyGuard, Ownable {
         } else {
             uint balance = IERC20(tokenAddress).balanceOf(msg.sender);
             if (balance < fee) {
-                return ICompaignFactory.InsufficientFee(tokenAddress, fee);
+                revert ICompaignFactory.InsufficientFee(tokenAddress, fee);
             }
             uint allow = IERC20(tokenAddress).allowance(msg.sender, address(this));
             if (allow < fee) {
@@ -65,7 +65,7 @@ contract CompaignFactory is Initializable, ReentrancyGuard, Ownable {
         }
         ICompaign(compaignAddress).initialize(info, compaignFactoryManager);
         ICompaignFactoryManager(compaignFactoryManager).registerCompaign(compaignAddress, msg.sender);
-        emit CompaignCreated(compaign, msg.sender);
+        emit CompaignCreated(compaignAddress, msg.sender);
     }
 
 }
