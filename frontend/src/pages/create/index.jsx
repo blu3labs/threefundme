@@ -20,6 +20,7 @@ import {
   erc20ABI,
 } from "wagmi";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 import { writeContract } from "../../utils/writeContract";
 import {
   compaignFactoryAbi,
@@ -30,6 +31,7 @@ import { addFile } from "../../utils/addFileHook";
 import { apeCoinAddresses } from "../../contracts/ape";
 import rpc from "../../utils/rpc.json";
 function Create() {
+  const navigate = useNavigate();
   const { switchNetworkAsync } = useSwitchNetwork();
   const { address } = useAccount();
   const { chain } = useNetwork();
@@ -127,7 +129,7 @@ function Create() {
         address,
         [...steps],
       ];
-      const tx = await writeContract({
+      const receipt = await writeContract({
         address: compaignFactoryAddress[chain?.id],
         abi: compaignFactoryAbi,
         method: "createCompaign",
@@ -136,9 +138,18 @@ function Create() {
         chainId: chain?.id,
         switchNetworkAsync: switchNetworkAsync,
       });
-      await tx.wait()
       setLoading(false);
-      console.log(tx, "tx");
+      let decoderAddress;
+      console.log(receipt, "receipt");
+      for (let i in receipt?.logs) {
+        if (receipt?.logs[i]?.address == compaignFactoryAddress[chain?.id]) {
+          decoderAddress = ethers.utils.defaultAbiCoder.decode(
+            ["address"],
+            receipt?.logs[i]?.topics[1]
+          );
+        }
+      }
+      navigate(`/details/${decoderAddress[0]}?chainId=${chain?.id}`);
     } catch (error) {
       setLoading(false);
       console.log(error);

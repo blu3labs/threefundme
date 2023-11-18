@@ -7,7 +7,7 @@ import {
   EthSVG,
   Typography,
 } from "@ensdomains/thorin";
-import { useNetwork } from "wagmi";
+import { useNetwork, useAccount } from "wagmi";
 import rpc from "../../utils/rpc.json";
 import {
   compaignFactoryManagerAbi,
@@ -21,9 +21,11 @@ import PoolCard from "./components/poolCard";
 function Home() {
   const [activeTab, setActiveTab] = useState(0);
   const { chain } = useNetwork();
+  const { address } = useAccount();
   const provider = new ethers.providers.StaticJsonRpcProvider(rpc[chain?.id]);
 
   const [allCompaigns, setAllCompaigns] = useState();
+  const [myCompaigns, setMyCompaigns] = useState();
   const fetchAllCompaings = async () => {
     try {
       const contract = new ethers.Contract(
@@ -67,19 +69,21 @@ function Home() {
           banner: a["compaign"]["details"][6],
           minBuy: a["compaign"]["numericDetails"][0]?.toString(),
           totalPrice: a["compaign"]["numericDetails"][1]?.toString(),
+          owner: a["compaign"]["owner"],
           totalSteps: a["allSteps"]?.length,
           allSteps: allSteps,
         });
       }
-      console.log(formatData, "formatData");
       setAllCompaigns(formatData);
     } catch (error) {
       console.log(error);
     }
   };
+
   useEffect(() => {
     fetchAllCompaings();
   }, [chain]);
+  const [search, setSearch] = useState("");
   return (
     <div className="homeContainer">
       <div className="homeCardListFilterContainer">
@@ -89,6 +93,8 @@ function Home() {
           inputMode="text"
           size="small"
           width="800px"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
         <div className="foundTypeContainer">
           <div
@@ -108,7 +114,12 @@ function Home() {
       <div className="homeCardListContainer">
         {allCompaigns &&
           allCompaigns?.map((e, i) => {
-            return <PoolCard item={e} key={i} chain={chain?.id} />;
+            if (activeTab == 0 && e.address.includes(search))
+              return <PoolCard item={e} key={i} chain={chain?.id} />;
+            else {
+              if (e.owner == address && e.address.includes(search))
+                return <PoolCard item={e} key={i} chain={chain?.id} />;
+            }
           })}
       </div>
     </div>

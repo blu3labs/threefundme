@@ -9,11 +9,12 @@ import {
 } from "@ensdomains/thorin";
 import { Core } from "@walletconnect/core";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useAccount, useNetwork } from "wagmi";
+import { useAccount, useNetwork, useEnsName } from "wagmi";
 import scrollLogo from "../../../assets/scrollLogo.jpeg";
 function ConnectWallet() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
+
   const { chain } = useNetwork();
   const availableChains = [97, 534352, 11155111];
   const [isAvailable, setIsAvailable] = useState(false);
@@ -28,8 +29,21 @@ function ConnectWallet() {
     97: "https://logowik.com/content/uploads/images/binance-smart-chain3412.logowik.com.webp",
     534352: scrollLogo,
     534353: scrollLogo,
-    11155111: scrollLogo,
+    11155111:
+      "https://w7.pngwing.com/pngs/268/1013/png-transparent-ethereum-eth-hd-logo-thumbnail.png",
   };
+  const { data } = useEnsName({
+    address: address,
+  });
+  console.log(data, "ens name");
+
+  const fethcEnsName = async () => {
+    if (address) {
+    }
+  };
+  useEffect(() => {
+    fethcEnsName();
+  }, [address, chain]);
   return (
     <div>
       {address ? (
@@ -50,7 +64,7 @@ function ConnectWallet() {
               }}
               onClick={() => open({ view: "Account" })}
             >
-              {address.slice(0, 4) + "..." + address.slice(-4)}
+              {data ? data : address.slice(0, 4) + "..." + address.slice(-4)}
             </Typography>
           </div>
         ) : (
