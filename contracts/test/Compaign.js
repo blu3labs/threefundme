@@ -1,6 +1,7 @@
 const {ethers} = require("hardhat")
 const {expect} = require("chai")
-
+const { time } = require( "@nomicfoundation/hardhat-network-helpers");
+const BigNumber = require("bignumber.js")
 
 describe("Compaign", function() {
 
@@ -34,7 +35,7 @@ describe("Compaign", function() {
         await tx.wait()
     })
 
-    let step1expire = (Date.now() / 1000  + 60).toFixed(0)
+    let step1expire = (Date.now() / 1000  + 1200).toFixed(0)
 
     it("Main features compaign", async function() {
         let step2expire = ( Date.now() / 1000  + 6600).toFixed(0)
@@ -50,14 +51,16 @@ describe("Compaign", function() {
                 [
                     ["step1"],
                     [],
-                    "10000000000000000000",
-                    step1expire
+               
+                    step1expire,
+                    "10000000000000000000"
                 ],
                 [
                     ["step2"],
                     [],
-                    "30000000000000000000",
+            
                     step2expire,
+                    "30000000000000000000"
                 ]
             ]
         ]
@@ -68,10 +71,36 @@ describe("Compaign", function() {
         let tx = await factory.createCompaign(compaignInfo)
         let result = await tx.wait()
         console.log(result)
-        let compaign = await ethers.getContractAt("Compaign", result.events[result.events.length - 1].address)
+        let compaign = await ethers.getContractAt("Compaign", result.events[result.events.length - 3].address)
 
         // creation of post
+        console.log("created")
 
+        let info  =await compaign.getCompaignInfo()
+        console.log(info, "info")
+
+        let post = await compaign.makePost(0,["Myyy first postt", "here we go"])
+        await post.wait()
+        console.log("post 1 ok")
+    
+        let post2 = await compaign.makePost(0,["Myyy second postt", "here we go"])
+        await post2.wait()
+
+        let txapprov2 = await ape.approve(compaign.address, "1500000000000000000000")
+        await txapprov2.wait()
+
+        let contribution = await compaign.contribute("10000000000000000000")
+        await contribution.wait()
+
+
+        //we need to wait until step1expire.
+        await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step1expire).add(1)));
+  
+        let info2  =await compaign.getCompaignInfo()
+        console.log(info2, "info")
+        // able to change to next step.
+        tx = await compaign.switchStep()
+        await tx.wait()
 
     })
 

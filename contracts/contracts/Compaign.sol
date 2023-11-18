@@ -294,7 +294,13 @@ contract Compaign is  ERC721Upgradeable {
 
         StepStateInfo[] memory listSteps =  new StepStateInfo[](compaignDetails.steps.length);
         for(uint i = 0; i < compaignDetails.steps.length; i++) {
-            listSteps[i] = stepStateInfo[i];
+            listSteps[i] = StepStateInfo({
+                expireTime: compaignDetails.steps[i].expireTime,
+                stepId: i,
+                currentAmount: stepCollect[i],
+                collected: stepAmountCollected[i],
+                posts: new ICompaign.PostInfo[](postsLengthForStep[i])
+            });
         }
         CompaignFullInfo memory full = CompaignFullInfo({
             compaign: compaignDetails,
