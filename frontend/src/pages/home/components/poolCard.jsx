@@ -3,8 +3,11 @@ import { Button, Card, Typography } from "@ensdomains/thorin";
 import { TfiWorld } from "react-icons/tfi";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaSquareXTwitter } from "react-icons/fa6";
-
-function PoolCard() {
+import { useNavigate } from "react-router-dom";
+function PoolCard({ item, chain }) {
+  const navigate = useNavigate();
+  const percentage =
+    (item?.totalAmount / 10 ** 18 / (item?.totalPrice / 10 ** 18)) * 100;
   return (
     <Card
       style={{
@@ -13,61 +16,71 @@ function PoolCard() {
     >
       <div className="cardContainer">
         <div className="bannerContainer">
-          <img
-            className="cardBanner"
-            src="https://cdn.motor1.com/images/mgl/VA0z9/s1/4x3/tesla-roadster.webp"
-          />
+          <img className="cardBanner" src={item?.banner} />
           <div className="cardLogo">
-            <img
-              className="cardLogo"
-              src="https://sm.mashable.com/mashable_tr/photo/default/musk-kitap_vfeq.jpg"
-            />
-            <Typography fontVariant="smallBold">Test</Typography>
+            <img className="cardLogo" src={item?.logo} />
+            <Typography fontVariant="smallBold">{item?.name}</Typography>
           </div>
         </div>
         <div className="cardBodyContainer">
           <div className="cardBodyInfoContent">
             <Typography fontVariant="smallBold">Total Steps</Typography>
-            <Typography fontVariant="small">1</Typography>
+            <Typography fontVariant="small">{item?.totalSteps}</Typography>
           </div>
           <div className="cardBodyInfoContent">
             <Typography fontVariant="smallBold">Min Buy</Typography>
-            <Typography fontVariant="small">1 Ape</Typography>
+            <Typography fontVariant="small">
+              {item?.minBuy / 10 ** 18} Ape
+            </Typography>
           </div>
           <div className="cardBodyInfoContent">
-            <Typography fontVariant="smallBold">Soft Cap</Typography>
-            <Typography fontVariant="small">1000 Ape</Typography>
-          </div>
-          <div className="cardBodyInfoContent">
-            <Typography fontVariant="smallBold">Participants</Typography>
-            <Typography fontVariant="small">120</Typography>
+            <Typography fontVariant="smallBold">Total Price</Typography>
+            <Typography fontVariant="small">
+              {" "}
+              {item?.totalPrice / 10 ** 18} Ape
+            </Typography>
           </div>
           <div className="proggressBarContainer">
             <div className="progressBar">
               <div
                 className="progressBarContent"
                 style={{
-                  width: `${50}%`,
+                  width: `${percentage}%`,
                 }}
               ></div>
             </div>
             <div className="progressBarBottom">
-              0 Ape
-              <span>100 Ape</span>
+              {item?.totalAmount / 10 ** 18} Ape
+              <span>{item?.totalPrice / 10 ** 18} Ape</span>
             </div>
           </div>
         </div>
         <div className="cardFooter">
           <div className="socialMediaContainer">
-            <TfiWorld />
-            <FaTelegramPlane />
-            <FaSquareXTwitter />
+            {item?.website && (
+              <a href={item?.website}>
+                <TfiWorld />
+              </a>
+            )}{" "}
+            {item?.telegram && (
+              <a href={item?.telegram}>
+                <FaTelegramPlane />
+              </a>
+            )}{" "}
+            {item?.twitter && (
+              <a href={item?.twitter}>
+                <FaSquareXTwitter />
+              </a>
+            )}
           </div>
           <Button
             width="20"
             style={{
               height: "30px",
             }}
+            onClick={() =>
+              navigate(`/details/${item?.address}?chain=${chain}`)
+            }
           >
             <Typography fontVariant="extraSmall">View</Typography>
           </Button>
