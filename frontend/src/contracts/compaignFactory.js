@@ -1,5 +1,5 @@
 export const compaignFactoryAddress = {
-  97: "0x720558Bcf5eEc3D2B85685F83dC955302685d3ba",
+  534353: "0x720558Bcf5eEc3D2B85685F83dC955302685d3ba",
 };
 
 export const compaignFactoryAbi = [

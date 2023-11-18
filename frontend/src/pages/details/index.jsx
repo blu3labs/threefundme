@@ -19,8 +19,23 @@ import { FaSquareXTwitter } from "react-icons/fa6";
 import PostCard from "./components/postCard";
 import ChatCard from "./components/chatCard";
 import { IoChatbubble } from "react-icons/io5";
-
+import {
+  useNetwork,
+  useAccount,
+  useWalletClient,
+  useSwitchNetwork,
+} from "wagmi";
+import { ethers } from "ethers";
+import { walletClientToSigner } from "../../utils/walletConnectToSigner";
+import { writeContract } from "../../utils/writeContract";
+import { compaignAbi } from "../../contracts/compaign";
+import { addFile } from "../../utils/addFileHook";
 function Details() {
+  const { address } = useAccount();
+  const { chain } = useNetwork();
+  const { data: walletCl } = useWalletClient();
+  const { switchNetworkAsync } = useSwitchNetwork();
+  const [amount, setAmount] = useState();
   const dummyArray = [
     {
       step: "1",
@@ -117,6 +132,76 @@ function Details() {
   useEffect(() => {
     convertPreview();
   }, [file]);
+
+  const handleOwnerFunctions = async (method) => {
+    try {
+      const signer = walletClientToSigner(walletCl);
+      const tx = await writeContract({
+        signer: signer,
+        address: "",
+        abi: compaignAbi,
+        method: method,
+        switchNetworkAsync: switchNetworkAsync,
+      });
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleContribute = async () => {
+    try {
+      const signer = walletClientToSigner(walletCl);
+      const tx = await writeContract({
+        signer: signer,
+        address: "",
+        abi: compaignAbi,
+        method: "contribute",
+        args: [ethers.utils.parseEther(amount?.toString())],
+        switchNetworkAsync: switchNetworkAsync,
+      });
+      console.log(tx);
+    } catch (error) {
+      console.log(amount);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    try {
+      const signer = walletClientToSigner(walletCl);
+      const tx = await writeContract({
+        signer: signer,
+        address: "",
+        abi: compaignAbi,
+        method: "withdraw",
+        switchNetworkAsync: switchNetworkAsync,
+      });
+      console.log(tx);
+    } catch (error) {
+      console.log(amount);
+    }
+  };
+  const [postData, setPostData] = useState({
+    title: "",
+    description: "",
+  });
+  const makePost = async () => {
+    try {
+      const fileUrl = await addFile(file);
+      const signer = walletClientToSigner(walletCl);
+      const tx = await writeContract({
+        signer: signer,
+        address: "",
+        abi: compaignAbi,
+        method: "makePost",
+        args: ["1", [fileUrl, postData.title, postData.description]],
+        switchNetworkAsync: switchNetworkAsync,
+      });
+      console.log(tx);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const AddPostModal = () => {
     return (
       <Modal open={modalOpen == true} onDismiss={() => setModalOpen(false)}>
@@ -168,13 +253,28 @@ function Details() {
               )
             }
           </FileInput>
-          <Input label="Title" placeholder="Lorem Ipsum" suffix="Text" />
-          <Input label="Title" placeholder="Lorem Ipsum" suffix="Text" />
-          <Textarea label="Description" placeholder="Share your story…" />
+          <Input
+            label="Title"
+            placeholder="Lorem Ipsum"
+            suffix="Text"
+            value={postData.title}
+            onChange={(e) =>
+              setPostData({ ...postData, title: e.target.value })
+            }
+          />
+          <Textarea
+            label="Description"
+            placeholder="Share your story…"
+            value={postData.description}
+            onChange={(e) =>
+              setPostData({ ...postData, description: e.target.value })
+            }
+          />
           <Button
             style={{
               height: "2rem",
             }}
+            onClick={() => makePost()}
           >
             Save
           </Button>
@@ -182,8 +282,7 @@ function Details() {
       </Modal>
     );
   };
-  const [toast, setToast] = useState(false);
-  console.log(toast, "toast");
+
   return (
     <div className="detailsWrapper">
       {modalOpen && AddPostModal()}
@@ -346,14 +445,25 @@ function Details() {
               placeholder="0.5 APE"
               suffix="Number"
               type="Number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
               onWheel={() => document.activeElement.blur()}
             />
             <Button
               style={{
                 height: "2rem",
               }}
+              onClick={() => handleContribute()}
             >
               Contribute
+            </Button>
+            <Button
+              style={{
+                height: "2rem",
+              }}
+              onClick={() => handleWithdraw()}
+            >
+              withdraw
             </Button>
           </Card>
         </div>

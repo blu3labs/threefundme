@@ -26,6 +26,7 @@ import {
 } from "../../contracts/compaignFactory";
 import { walletClientToSigner } from "../../utils/walletConnectToSigner";
 import { addFile } from "../../utils/addFileHook";
+import { apeCoinAddresses } from "../../contracts/ape";
 function Create() {
   const { switchNetworkAsync } = useSwitchNetwork();
   const { address } = useAccount();
@@ -119,7 +120,7 @@ function Create() {
           ethers.utils.parseEther(createData.minBuy?.toString()),
           ethers.utils.parseEther(createData.totalPrice?.toString()),
         ],
-        "",
+        apeCoinAddresses[chain?.id],
         address,
         [...steps],
       ];
