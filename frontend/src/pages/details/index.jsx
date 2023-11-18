@@ -118,9 +118,10 @@ function Details() {
         for (let post of steps["posts"]) {
           posts.push({
             step: steps["stepId"]?.toString(),
-            img: post["details"][0],
+            file: post["details"][0],
             title: post["details"][1],
             desc: post["details"][2],
+            type: post["details"][3] || "image",
             date: moment(
               new Date(post["timestamp"]?.toString() * 1000).getTime()
             ).format("DD/MM/YYYY HH:mm"),
@@ -165,6 +166,7 @@ function Details() {
       console.log(error);
     }
   };
+  console.log(details,"details")
   const [isContribute, setisContribute] = useState(false);
   const hasContribute = async (id) => {
     try {
@@ -230,7 +232,7 @@ function Details() {
   };
   const handleContribute = async () => {
     try {
-      console.log("girdi mi")
+      console.log("girdi mi");
       setContributeLoading(true);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
@@ -248,7 +250,6 @@ function Details() {
       console.log(error);
     }
   };
-  console.log(contributeLoading,"contributeloading")
   const [withdrawLoading, setWithdrawLoading] = useState(false);
   const handleWithdraw = async () => {
     try {
@@ -274,9 +275,11 @@ function Details() {
     description: "",
   });
   const [postLoading, setPostLoading] = useState(false);
+  console.log(file, "file");
   const makePost = async () => {
     try {
       setPostLoading(true);
+      console;
       const fileUrl = await addFile(file);
       const signer = walletClientToSigner(walletCl);
       const tx = await writeContract({
@@ -286,7 +289,12 @@ function Details() {
         method: "makePost",
         args: [
           details?.currentStatus,
-          [fileUrl, postData.title, postData.description],
+          [
+            fileUrl,
+            postData.title,
+            postData.description,
+            file?.type?.split("/")[0],
+          ],
         ],
         switchNetworkAsync: switchNetworkAsync,
       });
@@ -310,7 +318,7 @@ function Details() {
           }}
           title="Add Post"
         >
-          {filePreview && (
+          {filePreview && file?.type?.split("/")[0] === "image" && (
             <img
               src={filePreview}
               style={{
@@ -320,46 +328,37 @@ function Details() {
               }}
             />
           )}
-          <FileInput maxSize={1} onChange={(file) => setFile(file)}>
-            {(context) =>
-              context.name ? (
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "1rem" }}
-                  onClick={context.reset}
-                >
-                  {context.name}
-                  <div
-                    style={{
-                      height: "16px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setFile(null);
-                      setFilePreview(null);
-                    }}
-                  >
-                    <CrossSVG />
-                  </div>
-                </div>
-              ) : (
-                <div className="fileInputContent">
-                  Image, Video
-                  <div className="fileInput">
-                    <Typography
-                      style={{
-                        color: "#9B9BA6",
-                        width: "100%",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {context.droppable ? "Drop file" : "Attach file"}
-                    </Typography>
-                    <div className="inputType">File</div>
-                  </div>
-                </div>
-              )
-            }
-          </FileInput>
+          {filePreview && file?.type?.split("/")[0] === "video" && (
+            <video
+              src={filePreview}
+              controls
+              preload="auto"
+              style={{
+                height: "200px",
+                objectFit: "cover",
+                borderRadius: "12px",
+              }}
+            ></video>
+          )}
+          {filePreview && file?.type?.split("/")[0] === "audio" && (
+            <audio
+              src={filePreview}
+              controls
+              preload="auto"
+              style={{
+                borderRadius: "12px",
+                width: "100%",
+              }}
+            ></audio>
+          )}
+          <Input
+            label="File Type"
+            type="file"
+            suffix="File"
+            placeholder="File"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+
           <Input
             label="Title"
             placeholder="Lorem Ipsum"

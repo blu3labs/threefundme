@@ -15,7 +15,27 @@ function PostCard({ item }) {
             <Typography fontVariant="largeBold">{item?.title}</Typography>
             <Typography fontVariant="small">{item?.date}</Typography>
           </div>
-          <img src={item?.img} className="postImage" />
+          {item?.type == "image" && (
+            <img src={item?.file} className="postImage" />
+          )}
+          {item?.type == "video" && (
+            <video
+              src={item?.file}
+              className="postImage"
+              controls
+            ></video>
+          )}
+          {item?.type == "audio" && (
+            <audio
+            style={{
+              height: "4rem",
+            }}
+              src={item?.file}
+              className="postImage"
+              controls
+              preload="auto"
+            ></audio>
+          )}
         </div>
         <div className="postDesc">
           <ScrollBox style={{ height: "100px" }}>
