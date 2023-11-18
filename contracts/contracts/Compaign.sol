@@ -12,7 +12,7 @@ import "./interfaces/ICompaign.sol";
 import "./interfaces/ICompaignFactoryManager.sol";
 
 
-
+// main logic of the compaign
 contract Compaign is  ERC721Upgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
     enum StatusCompaign {
