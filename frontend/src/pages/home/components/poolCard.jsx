@@ -8,6 +8,13 @@ function PoolCard({ item, chain }) {
   const navigate = useNavigate();
   const percentage =
     (item?.totalAmount / 10 ** 18 / (item?.totalPrice / 10 ** 18)) * 100;
+  const statusText = {
+    0: "Failed",
+    1: "Success",
+    2: "Step Switch Required",
+    3: "Active",
+  };
+  console.log(statusText[item?.statusCompaign], "statusText", item)
   return (
     <Card
       style={{
@@ -23,6 +30,12 @@ function PoolCard({ item, chain }) {
           </div>
         </div>
         <div className="cardBodyContainer">
+          <div className="cardBodyInfoContent">
+            <Typography fontVariant="smallBold">Status</Typography>
+            <Typography fontVariant="small">
+              {statusText[item?.statusCompaign]}
+            </Typography>
+          </div>
           <div className="cardBodyInfoContent">
             <Typography fontVariant="smallBold">Total Steps</Typography>
             <Typography fontVariant="small">{item?.totalSteps}</Typography>
@@ -78,9 +91,7 @@ function PoolCard({ item, chain }) {
             style={{
               height: "30px",
             }}
-            onClick={() =>
-              navigate(`/details/${item?.address}?chain=${chain}`)
-            }
+            onClick={() => navigate(`/details/${item?.address}?chain=${chain}`)}
           >
             <Typography fontVariant="extraSmall">View</Typography>
           </Button>

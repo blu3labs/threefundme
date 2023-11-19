@@ -1,5 +1,5 @@
 export const compaignFactoryManagerAddress = {
-  11155111: "0x77Fb4eFC9906c11cc1AdDB31CBCdC82266c41D9b",
+  11155111: "0x3e63ec8BF9abFAbc0B2006cD19aEa8790620c038",
 };
 
 export const compaignFactoryManagerAbi = [

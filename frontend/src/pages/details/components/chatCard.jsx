@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Card,
@@ -21,6 +21,10 @@ function ChatCard({
   wakuStatus,
 }) {
   const { address } = useAccount();
+  const addressToNumber = (address) => {
+    return parseInt(address.slice(2, 10), 16) % 20;
+  };
+
   return (
     <Card
       style={{
@@ -49,6 +53,7 @@ function ChatCard({
           >
             {messages.map((e, i) => {
               const owner = e.address === address;
+              const number = addressToNumber(e.address);
               return (
                 <div
                   className="chatTextContainer"
@@ -66,7 +71,7 @@ function ChatCard({
                       alignItems: "flex-start",
                     }}
                   >
-                    <Avatar src={user} />
+                    <Avatar src={`https://noun.pics/${number}.jpg`} />
                     {e.address.slice(0, 4) + "..." + e.address.slice(-4)}
                   </div>
                   <Typography fontVariant="extraSmall">{e.text}</Typography>

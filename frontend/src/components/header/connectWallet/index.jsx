@@ -11,6 +11,7 @@ import { Core } from "@walletconnect/core";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount, useNetwork, useEnsName } from "wagmi";
 import scrollLogo from "../../../assets/scrollLogo.jpeg";
+import axios from "axios";
 function ConnectWallet() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();

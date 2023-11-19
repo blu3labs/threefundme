@@ -227,7 +227,7 @@ function Details() {
       fethcUserAllowance();
     }, 7000);
     return () => clearInterval(interval);
-  }, [compaignAddress]);
+  }, [compaignAddress, address]);
   let id = "0xdsqdsdsqdqdsd";
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -331,6 +331,7 @@ function Details() {
         address: compaignAddress,
         abi: compaignAbi,
         method: "withdraw",
+        args: [details?.currentStatus],
         switchNetworkAsync: switchNetworkAsync,
       });
       let errorCode = tx.error?.data?.originalError?.data;
@@ -503,7 +504,7 @@ function Details() {
       })
       .catch((err) => console.log(err));
   }, []);
-  console.log(wakuStatus,"wakuStatus")
+  console.log(wakuStatus, "wakuStatus");
   useEffect(() => {
     if (!waku) return;
 
@@ -621,12 +622,18 @@ function Details() {
     setChatContent("");
   };
   const percentage =
-    ((details?.totalAmount / 10 ** 18 )/ (details?.totalPrice / 10 ** 18)) * 100;
+    (details?.totalAmount / 10 ** 18 / (details?.totalPrice / 10 ** 18)) * 100;
   const activeStepPercentage =
-    ((details?.allSteps[details?.currentStatus]?.currentAmount /
-      10 ** 18) /
+    (details?.allSteps[details?.currentStatus]?.currentAmount /
+      10 ** 18 /
       (details?.allStepsAmount[details?.currentStatus] / 10 ** 18)) *
     100;
+  const statusText = {
+    0: "FAILED",
+    1: "SUCCESS",
+    2: "STEP SWITCH REQUIRED",
+    3: "ACTIVE",
+  };
   return (
     <div className="detailsWrapper">
       {modalOpen && AddPostModal()}
@@ -731,6 +738,12 @@ function Details() {
               </Typography>
             </div>
             <div className="fundInfoContent">
+              <Typography fontVariant="smallBold">Status</Typography>
+              <Typography fontVariant="small">
+                {statusText[details?.statusCompaign]}
+              </Typography>
+            </div>
+            <div className="fundInfoContent">
               <Typography fontVariant="smallBold">Active Step</Typography>
               <Typography fontVariant="small">
                 {Number(details?.currentStatus) + 1}
@@ -770,12 +783,16 @@ function Details() {
               </div>
             </div>
             <div className="progressBarContainer">
-              <Typography fontVariant="small">Step {details?.currentStatus}</Typography>
+              <Typography fontVariant="small">
+                Step {Number(details?.currentStatus) + 1}
+              </Typography>
               <div className="progressBar">
                 <div
                   className="progressBarContent"
                   style={{
-                    width: `${activeStepPercentage > 100 ? 100 : activeStepPercentage}%`,
+                    width: `${
+                      activeStepPercentage > 100 ? 100 : activeStepPercentage
+                    }%`,
                   }}
                 ></div>
               </div>
@@ -808,10 +825,12 @@ function Details() {
             <Button
               style={{
                 height: "2rem",
-                opacity: contributeLoading && "0.5",
+                opacity:
+                  (contributeLoading ||
+                  details?.statusCompaign != "3") && "0.5",
                 cursor: contributeLoading && "progress",
               }}
-              disabled={contributeLoading}
+              disabled={contributeLoading || details?.statusCompaign != "3"}
               onClick={() => {
                 if (userBalance?.allowance <= 0) {
                   approve();
@@ -822,17 +841,21 @@ function Details() {
             >
               {userBalance?.allowance <= 0 ? "Approve" : "Contribute"}
             </Button>
-            <Button
-              style={{
-                height: "2rem",
-                opacity: withdrawLoading && "0.5",
-                cursor: withdrawLoading && "progress",
-              }}
-              disabled={withdrawLoading}
-              onClick={() => handleWithdraw()}
-            >
-              withdraw
-            </Button>
+            {isContribute && (
+              <Button
+                style={{
+                  height: "2rem",
+                  opacity:
+                    (withdrawLoading ||
+                    details?.statusCompaign != "0") && "0.5",
+                  cursor: withdrawLoading && "progress",
+                }}
+                disabled={withdrawLoading || details?.statusCompaign != "0"}
+                onClick={() => handleWithdraw()}
+              >
+                Withdraw
+              </Button>
+            )}
           </Card>
         </div>
         <div className="detailspProjectPostContainer">
