@@ -6,7 +6,7 @@ module.exports = {
   networks: {
     //testnet
     baseGoerliTestnet:{
-      url:"https://base-goerli.gateway.tenderly.co",
+      url:"https://base-goerli.publicnode.com",
       accounts: accountConfig
     },
     scrollTestnet:{
@@ -14,7 +14,7 @@ module.exports = {
       accounts: accountConfig
     },
     zkSyncTestnet:{
-      url:"https://testnet.era.zksync.dev",
+      url:"https://zksync-era-testnet.blockpi.network/v1/rpc/public",
       accounts: accountConfig
     },
     bscTestnet:{

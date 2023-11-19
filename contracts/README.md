@@ -27,18 +27,23 @@ The compaign will manage all the logic of the compaign, the compaign will be cre
 
 
 ## Scroll Testnet
+ApeCoin deployed at:  0x2298697129DEb8EB43b73A11bfb738BC1f35F0c2
+FactoryManager deployed at:  0x44dACEc546c52A1488d21463B6DF68E2a92A2Cbb
+Compaign deployed at:  0xFC1Be3Ed0F9821a83e1123476b2F48de6D6506Ec
+Factory deployed at:  0x862FF2Cb647A2F284d79a7296b98361334433D68
 
+## Linea Testnet
 ApeCoin deployed at:  0xDac05a10F2eF236DFB93a9A4f50d2596B094C272
 FactoryManager deployed at:  0x51C21b82Cb26CD1Eb5126Abc655533212866a066
 Compaign deployed at:  0xF3B1e4a58bB4c4CBf4280A689b7a4FE2f1db5D38
 Factory deployed at:  0x3a29Dcd9f39Be75b1197900F04458Bc87F9eE636
 
-## BSC Testnet
-ApeCoin deployed at:  0x44dACEc546c52A1488d21463B6DF68E2a92A2Cbb
-FactoryManager deployed at:  0xFC1Be3Ed0F9821a83e1123476b2F48de6D6506Ec
-Compaign deployed at:  0x862FF2Cb647A2F284d79a7296b98361334433D68
-Factory deployed at:  0xe78737D86675aaac9Db96754917b493914b8a72a
 
+## Base Goerli
+ApeCoin deployed at:  0x3a29Dcd9f39Be75b1197900F04458Bc87F9eE636
+FactoryManager deployed at:  0xDf797C8461756C46902d0242d9f59f743f9913d4
+Compaign deployed at:  0xa22c013AFe31f6037e12a8a178FeaF20f1c2630d
+Factory deployed at:  0x2298697129DEb8EB43b73A11bfb738BC1f35F0c2
 
 ## Ethereum Sepolia Testnet
 

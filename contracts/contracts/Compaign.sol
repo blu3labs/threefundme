@@ -196,7 +196,7 @@ contract Compaign is  ERC721Upgradeable {
     }
 
     function collectTokens() external onlyCompaignOwner  {
-        require(getStatusCompaign() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS, "Compaign not active");
+        require(getStatusCompaign() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS, "Compaign not active or not yet completed");
         // posts checks
         ICompaign.StepInfo memory stepInfo = compaignDetails.steps[currentStepStatus - 1];
         uint currentStep = currentStepStatus - 1;

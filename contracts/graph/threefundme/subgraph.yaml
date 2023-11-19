@@ -6,9 +6,9 @@ dataSources:
     name: CompaignFactoryManager
     network: sepolia
     source:
-      address: "0x7A47cbb1952aB28D3fd011fA01A201820F4354F3"
+      address: "0x5aE8E6Bb0F529A0b5a49BE8A6FCE457024D634B5"
       abi: CompaignFactoryManager
-      startBlock: 4717393
+      startBlock: 4721522
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
