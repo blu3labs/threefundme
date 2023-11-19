@@ -17,6 +17,7 @@ import { compaignAbi } from "../../contracts/compaign";
 import { ethers } from "ethers";
 //components
 import PoolCard from "./components/poolCard";
+import axios from "axios";
 
 function Home() {
   const [activeTab, setActiveTab] = useState(0);
@@ -33,13 +34,34 @@ function Home() {
         compaignFactoryManagerAbi,
         provider
       );
-      const data = await contract.getAllCompaigns();
       let compaigns = [];
+      let data = []
+      if (chain?.id === 11155111) {
+        // use thegraph
+        /**
+         * "{\n  compaignContributionReceiveds(first: 5) {\n    id\n    compaign\n    contributor\n    blockNumber\n  }\n  compaignCreateds(first: 5) {\n    id\n    compaign\n    owner\n    blockNumber\n  }\n}"
+
+         */
+       let dataPost = await axios.post("https://api.studio.thegraph.com/query/58883/threefundme/version/latest", {query:`{\n    compaignCreateds{\n    id\n    compaign\n    owner\n    blockNumber\n  }\n}
+       `})
+
+   
+        
+       data = dataPost.data.data.compaignCreateds.map((e) => e.compaign)
+       for (let i of dataPost.data.data.compaignCreateds) {
+        const contract2 = new ethers.Contract(i.compaign, compaignAbi, provider);
+        const details = contract2.getCompaignInfo();
+        compaigns.push(details);
+      }
+      } else {
+       data = await contract.getAllCompaigns();
+
       for (let i of data) {
         const contract2 = new ethers.Contract(i, compaignAbi, provider);
         const details = contract2.getCompaignInfo();
         compaigns.push(details);
       }
+    }
       const allCompaigns = await Promise.all(compaigns);
       console.log(allCompaigns, "data");
       const formatData = [];
