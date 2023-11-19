@@ -99,11 +99,12 @@ describe("Compaign", function() {
   
         let info2  =await compaign.getCompaignInfo()
         console.log(info2.allSteps[0].posts, "info")
-        process.exit(1)
+    
         // able to change to next step.
         tx = await compaign.switchStep()
         await tx.wait()
-
+        let info44  =await compaign.getCompaignInfo()
+        console.log(info44, "infolol")
         tx = await compaign.collectTokens()
         await tx.wait()
 
@@ -231,5 +232,246 @@ describe("Compaign", function() {
     const getAllContribByUser = await factoryManager.getAllContributionsByUser(owner.address)
 
     console.log("getAllContribByUser ", getAllContribByUser)
+})
+
+
+
+it("scenario - 3 steps  ", async () => {
+    let step1expireWithdraw = ( Date.now() / 1000  + 20200).toFixed(0)
+
+    let step2expireWithdraw = ( Date.now() / 1000  + 80600).toFixed(0)
+    let step3expireWithdraw = ( Date.now() / 1000  + 1006000).toFixed(0)
+    const compaignInfo = [
+        ["MyCompaign", "compaign","","","","","BannerURL"],
+      [],
+      ape.address,
+      owner.address,
+      [
+        [
+        ["stepinfo"],
+        [],
+        step1expireWithdraw,
+        "10000000000000000000",
+      
+        ],
+        [
+          ["step2info"],
+          [],
+          step2expireWithdraw,
+          "30000000000000000000",
+
+          ],
+           [
+                ["step3info"],
+                [],
+                step3expireWithdraw,
+                "30000000000000000000",
+      
+                ],
+      ]
+    ]
+
+
+    let txapprov = await ape.approve(factory.address, "1500000000000000000000")
+    await txapprov.wait()
+    let tx = await factory.createCompaign(compaignInfo)
+   let result =  await tx.wait()
+
+   let compaign = await ethers.getContractAt("Compaign", result.events[result.events.length - 3].address)
+   
+   let txapprov3 = await ape.connect(addr1).approve(compaign.address, "1500000000000000000000")
+   await txapprov3.wait()
+   let info = await compaign.getCompaignInfo()
+   console.log("INFO THIRD SCENARIO   ", info)
+   let contrib2=  await compaign.connect(addr1).contribute("10000000000000000000")
+   await contrib2.wait()
+    
+
+  
+   let post2 = await compaign.makePost(0,["Myyy second postt", "here we go"])
+   await post2.wait()
+   let post66 = await compaign.makePost(0,["Myyy third postt", "here we go"])
+
+   await post66.wait()
+   
+   await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step1expireWithdraw).add(1)));
+   tx = await compaign.switchStep()
+    await tx.wait()
+
+    console.log("next step ok")
+
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+    console.log("collect tokens ok") 
+    
+    // step 2
+    let post3 = await compaign.makePost(1,["Myyy second postt", "here we go"])
+    await post3.wait()
+    let post667 = await compaign.makePost(1,["Myyy third postt", "here we go"])
+ 
+    await post667.wait()
+
+    let contrib3=  await compaign.connect(addr1).contribute("30000000000000000000")
+    await contrib3.wait()
+    await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step2expireWithdraw).add(1)));
+  
+    tx = await compaign.switchStep()
+    await tx.wait()
+
+    console.log("next step ok")
+    let info2 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info2)
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+    let contrib4=  await compaign.connect(addr1).contribute("30000000000000000000")
+    await contrib4.wait()
+    let post4 = await compaign.makePost(2,["Myyy second postt", "here we go"])
+    await post4.wait()
+    let post6678 = await compaign.makePost(2,["Myyy third postt", "here we go"])
+    await post6678.wait()
+    console.log("next step ok")
+    let info3 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info3)
+   
+    await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step3expireWithdraw).add(1)));
+  
+
+    let info4 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info4)
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+
+})
+
+it("four scenario with 4 steps" , async () => {
+    let step1expireWithdraw = ( Date.now() / 1000  + 20000000).toFixed(0)
+
+    let step2expireWithdraw = ( Date.now() / 1000  + 806000000).toFixed(0)
+    let step3expireWithdraw = ( Date.now() / 1000  + 1006000000).toFixed(0)
+    let step4expireWithdraw = ( Date.now() / 1000  + 100060000000).toFixed(0)
+    const compaignInfo = [
+        ["MyCompaign", "compaign","","","","","BannerURL"],
+      [],
+      ape.address,
+      owner.address,
+      [
+        [
+        ["stepinfo"],
+        [],
+        step1expireWithdraw,
+        "10000000000000000000",
+      
+        ],
+        [
+          ["step2info"],
+          [],
+          step2expireWithdraw,
+          "30000000000000000000",
+
+          ],
+           [
+                ["step3info"],
+                [],
+                step3expireWithdraw,
+                "30000000000000000000",
+      
+                ],
+                [
+                    ["step4info"],
+                    [],
+                    step4expireWithdraw,
+                    "30000000000000000000",
+          
+                    ],
+      ]
+    ]
+
+
+    let txapprov = await ape.approve(factory.address, "1500000000000000000000")
+    await txapprov.wait()
+    let tx = await factory.createCompaign(compaignInfo)
+   let result =  await tx.wait()
+
+   let compaign = await ethers.getContractAt("Compaign", result.events[result.events.length - 3].address)
+   
+   let txapprov3 = await ape.connect(addr1).approve(compaign.address, "1500000000000000000000")
+   await txapprov3.wait()
+   let info = await compaign.getCompaignInfo()
+   console.log("INFO FOUR SCENARIO   ", info)
+   let contrib2=  await compaign.connect(addr1).contribute("10000000000000000000")
+   await contrib2.wait()
+    
+console.log("ok")
+  
+   let post2 = await compaign.makePost(0,["Myyy second postt", "here we go"])
+   await post2.wait()
+   let post66 = await compaign.makePost(0,["Myyy third postt", "here we go"])
+
+   await post66.wait()
+   
+   await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step1expireWithdraw).add(1)));
+   tx = await compaign.switchStep()
+    await tx.wait()
+
+    console.log("next step ok")
+
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+    console.log("collect tokens ok") 
+    
+    // step 2
+    let post3 = await compaign.makePost(1,["Myyy second postt", "here we go"])
+    await post3.wait()
+    let post667 = await compaign.makePost(1,["Myyy third postt", "here we go"])
+ 
+    await post667.wait()
+
+    let contrib3=  await compaign.connect(addr1).contribute("30000000000000000000")
+    await contrib3.wait()
+    await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step2expireWithdraw).add(1)));
+  
+    tx = await compaign.switchStep()
+    await tx.wait()
+
+    console.log("next step ok")
+    let info2 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info2)
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+    let contrib4=  await compaign.connect(addr1).contribute("30000000000000000000")
+    await contrib4.wait()
+    let post4 = await compaign.makePost(2,["Myyy second postt", "here we go"])
+    await post4.wait()
+    let post6678 = await compaign.makePost(2,["Myyy third postt", "here we go"])
+    await post6678.wait()
+    console.log("next step ok")
+    let info3 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info3)
+   
+    await time.increaseTo(ethers.utils.hexlify(ethers.BigNumber.from(step3expireWithdraw).add(1)));
+    tx = await compaign.switchStep()
+    await tx.wait()
+
+    let info4 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info4)
+    tx = await compaign.collectTokens()
+    await tx.wait()
+
+
+    let contrib44=  await compaign.connect(addr1).contribute("30000000000000000000")
+    await contrib44.wait()
+    let post44 = await compaign.makePost(3,["Myyy second postt", "here we go"])
+    await post44.wait()
+    let post66784 = await compaign.makePost(3,["Myyy third postt", "here we go"])
+    await post66784.wait()
+    let info5 = await compaign.getCompaignInfo()
+    console.log("INFO THIRD SCENARIO   ", info5)
+
+
 })
 })

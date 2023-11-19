@@ -98,11 +98,12 @@ contract Compaign is  ERC721Upgradeable {
 
     function getStatusCompaign() public view returns(StatusCompaign) {
         ICompaign.StepInfo memory step = compaignDetails.steps[currentStepStatus];
-        if (block.timestamp > step.expireTime && step.amountToBeRaised > totalAmount) {
+
+        if (block.timestamp > step.expireTime && step.amountToBeRaised > stepCollect[currentStepStatus]) {
             return StatusCompaign.FAILED;
-        } else if (block.timestamp > step.expireTime && step.amountToBeRaised >= totalAmount) {
+        } else if (block.timestamp >= step.expireTime && step.amountToBeRaised == stepCollect[currentStepStatus] && currentStepStatus < compaignDetails.steps.length - 1) {
             return StatusCompaign.STEP_SWITCH_REQUIRED;
-        } else if (currentStepStatus == compaignDetails.steps.length - 1 &&  step.amountToBeRaised >= totalAmount) {
+        } else if (currentStepStatus == compaignDetails.steps.length - 1 &&  step.amountToBeRaised == stepCollect[currentStepStatus]) {
             return StatusCompaign.SUCCESS;
         } else {
             return StatusCompaign.ACTIVE;
@@ -137,10 +138,11 @@ contract Compaign is  ERC721Upgradeable {
 
     function _createPost(string calldata bannerURL) private {
            ICompaign.PostInfo memory postInfo = ICompaign.PostInfo({
-            details: new string[](1),
+            details: new string[](7),
             timestamp: block.timestamp
         });
 
+        postInfo.details[1] = "Project Started";
         postInfo.details[0] = bannerURL;
         
         posts[currentStepStatus][postsLengthForStep[currentStepStatus] + 1] = postInfo;
@@ -152,6 +154,8 @@ contract Compaign is  ERC721Upgradeable {
         if (currentStepStatus > 0 ){
             require(stepAmountCollected[currentStepStatus - 1], "Tokens not yet collected");
         }
+        StepStateInfo memory stepInfo = stepStateInfo[currentStepStatus];
+        require(stepCollect[currentStepStatus] + amount <= compaignDetails.steps[currentStepStatus].amountToBeRaised , "Step have a max amount");
         require(getStatusCompaign() != StatusCompaign.FAILED &&  compaignDetails.steps[currentStepStatus].amountToBeRaised > stepCollect[currentStepStatus], "Step completed or failed");
         if (compaignDetails.numericDetails.length > 0) {
             require(amount >= compaignDetails.numericDetails[0], "Minimum contribution not reached");
@@ -174,43 +178,62 @@ contract Compaign is  ERC721Upgradeable {
             if(!contributorsAddress.contains(msg.sender)) {
             super._mint(msg.sender, newTokenId);
             contributorTokenId[msg.sender] = newTokenId;
-          
-                contributorsAddress.add(msg.sender);
+            contributorsAddress.add(msg.sender);
             }
         } else {
             userCont.amount += amount;
         }
 
-        
+
         hasContribute[msg.sender][currentStepStatus] = true;
+    
         ICompaignFactoryManager(factoryManager).registerContributionUser(msg.sender, address(this));
         totalAmount += amount;
+
         stepCollect[currentStepStatus] += amount;
       
         emit UserContributed(msg.sender, amount);
     }
 
     function collectTokens() external onlyCompaignOwner  {
-        require(getStatusCompaign() == StatusCompaign.SUCCESS, "Step not yet successfuly finished");
+        require(getStatusCompaign() == StatusCompaign.ACTIVE || getStatusCompaign() == StatusCompaign.SUCCESS, "Compaign not active");
         // posts checks
         ICompaign.StepInfo memory stepInfo = compaignDetails.steps[currentStepStatus - 1];
-        if (postsLengthForStep[currentStepStatus - 1] < 2) {
-            revert ICompaign.NoEnoughPosts(currentStepStatus);
+        uint currentStep = currentStepStatus - 1;
+        if (stepAmountCollected[currentStepStatus - 1]) {
+          // check current step
+            stepInfo = compaignDetails.steps[currentStepStatus];
+            currentStep = currentStepStatus;
+             if (postsLengthForStep[currentStepStatus] < 2) {
+                revert ICompaign.NoEnoughPosts(currentStepStatus);
+            }
+        }else {
+        
+            if (postsLengthForStep[currentStepStatus - 1] < 2) {
+                revert ICompaign.NoEnoughPosts(currentStepStatus - 1);
+            }
         }
+        require(block.timestamp >= stepInfo.expireTime, "Step not yet expired");
+        require(stepInfo.amountToBeRaised <= totalAmount, "Step not yet completed");
         if (compaignDetails.currency == address(0)) {
             payable(compaignDetails.owner).transfer(stepInfo.amountToBeRaised);
         } else {
+
             ERC20(compaignDetails.currency).transfer(compaignDetails.owner, stepInfo.amountToBeRaised);
         }
 
-        stepAmountCollected[currentStepStatus - 1] = true;
-        emit TokenCollected(compaignDetails.owner, stepInfo.amountToBeRaised, currentStepStatus);
+        stepAmountCollected[currentStep] = true;
+        emit TokenCollected(compaignDetails.owner, stepInfo.amountToBeRaised, currentStep);
     }
 
     function switchStep() external onlyCompaignOwner {
         if (getStatusCompaign() != StatusCompaign.STEP_SWITCH_REQUIRED) {
             revert ICompaign.StepCantSwitch(currentStepStatus);
         }
+         if (postsLengthForStep[currentStepStatus] < 2) {
+                revert ICompaign.NoEnoughPosts(currentStepStatus);
+        }
+        require(currentStepStatus + 1 < compaignDetails.steps.length, "No more steps");
         // require(getStatusCompaign() == StatusCompaign.STEP_SWITCH_REQUIRED, "Step cannot be switch");
         currentStepStatus = currentStepStatus + 1;
         emit NextStepSwitch(compaignDetails.owner, currentStepStatus - 1, currentStepStatus);
@@ -218,10 +241,12 @@ contract Compaign is  ERC721Upgradeable {
 
    function withdraw(uint stepId) external  onlyBuyer(stepId) {
         require(getStatusCompaign() == StatusCompaign.FAILED, "Compaign not failed");
-        ICompaign.UserContribution memory userCont = userContributions[msg.sender][currentStepStatus];
+        ICompaign.UserContribution memory userCont = userContributions[msg.sender][stepId];
         if (userCont.timestamp <= 0) {
             revert ICompaign.ContributionNotFound(msg.sender, currentStepStatus);
         }
+   
+
         // require(userCont.timestamp > 0, "Contribution not found");
         if (compaignDetails.currency == address(0)) {
             payable(msg.sender).transfer(userCont.amount);
@@ -232,7 +257,8 @@ contract Compaign is  ERC721Upgradeable {
 
         super.transferFrom(msg.sender, address(this), tokenId);
         super._burn(tokenId);
-     
+
+        stepCollect[stepId] -= userCont.amount;
         contributorsAddress.remove(msg.sender);
         ICompaignFactoryManager(factoryManager).removeContributionUser(msg.sender, address(this));
         emit Withdraw(msg.sender, userCont.amount);
