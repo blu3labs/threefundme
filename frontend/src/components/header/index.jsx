@@ -7,7 +7,7 @@ function Header() {
   return (
     <div className="headerContainer">
       <NavLink to="/">
-        <Typography fontVariant="extraLargeBold">ThreeFoundMe</Typography>
+        <Typography fontVariant="extraLargeBold">ThreeFundMe</Typography>
       </NavLink>
 
       <div className="headerMenuContainer">
