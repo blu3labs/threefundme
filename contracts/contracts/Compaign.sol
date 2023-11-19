@@ -13,7 +13,7 @@ import "./interfaces/ICompaignFactoryManager.sol";
 
 
 // main logic of the compaign
-contract Compaign is  ERC721Upgradeable {
+contract Compaign is ERC721Upgradeable {
     using EnumerableSet for EnumerableSet.AddressSet;
     enum StatusCompaign {
         FAILED,
@@ -348,7 +348,7 @@ contract Compaign is  ERC721Upgradeable {
                 collected: stepAmountCollected[i],
                 posts: new ICompaign.PostInfo[](postsLengthForStep[i])
             });
-           ICompaign.PostInfo[] memory listPosts = new ICompaign.PostInfo[](postsLengthForStep[i]);
+         
             for(uint j = 0; j < postsLengthForStep[i]; j++) {
                 listSteps[i].posts[j] = posts[i][j + 1];
             }
