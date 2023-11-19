@@ -11,13 +11,14 @@ import { Core } from "@walletconnect/core";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useAccount, useNetwork, useEnsName } from "wagmi";
 import scrollLogo from "../../../assets/scrollLogo.jpeg";
+import sepolio from "../../../assets/sepolio.jpeg";
 import axios from "axios";
 function ConnectWallet() {
   const { open } = useWeb3Modal();
   const { address } = useAccount();
 
   const { chain } = useNetwork();
-  const availableChains = [97, 534352, 11155111];
+  const availableChains = [534351, 11155111, 84531, 59140];
   const [isAvailable, setIsAvailable] = useState(false);
   useEffect(() => {
     if (availableChains.includes(chain?.id)) {
@@ -27,11 +28,12 @@ function ConnectWallet() {
     }
   }, [chain]);
   const chainsLogo = {
-    97: "https://logowik.com/content/uploads/images/binance-smart-chain3412.logowik.com.webp",
-    534352: scrollLogo,
-    534353: scrollLogo,
-    11155111:
-      "https://w7.pngwing.com/pngs/268/1013/png-transparent-ethereum-eth-hd-logo-thumbnail.png",
+    534351: scrollLogo,
+    11155111: sepolio,
+    84531:
+      "https://storage.googleapis.com/ethglobal-api-production/organizations%2Fh5ps8%2Flogo%2F1678294488367_W-9qsu1e_400x400.jpeg",
+    59140:
+      "https://pbs.twimg.com/profile_images/1639402103486521344/erDLnbwE_400x400.jpg",
   };
   const { data } = useEnsName({
     address: address,
