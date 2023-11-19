@@ -1,0 +1,10 @@
+
+
+.appContainer{
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  justify-content: space-between;
+  min-height: 100vh;
+}

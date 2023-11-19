@@ -1,0 +1,1 @@
+export const CONTENT_TOPIC = "/threefundme/1/compaign/"
