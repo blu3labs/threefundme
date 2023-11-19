@@ -5,7 +5,7 @@ function Footer() {
   return (
     <div className="footerContainer">
       <div className="footerSection">
-        <Typography fontVariant="extraSmall">Developed By Test</Typography>
+        <Typography fontVariant="extraSmall">Developed By Blu3</Typography>
       </div>
       <div
         className="footerSection"

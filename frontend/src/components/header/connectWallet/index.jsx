@@ -29,7 +29,8 @@ function ConnectWallet() {
   }, [chain]);
   const chainsLogo = {
     534351: scrollLogo,
-    11155111: sepolio,
+    11155111:
+      "https://logowik.com/content/uploads/images/ethereum-eth7803.logowik.com.webp",
     84531:
       "https://storage.googleapis.com/ethglobal-api-production/organizations%2Fh5ps8%2Flogo%2F1678294488367_W-9qsu1e_400x400.jpeg",
     59140:

@@ -228,7 +228,7 @@ function Details() {
     }, 7000);
     return () => clearInterval(interval);
   }, [compaignAddress, address]);
-  let id = "0xdsqdsdsqdqdsd";
+  let id = details?.id;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState();
@@ -826,8 +826,8 @@ function Details() {
               style={{
                 height: "2rem",
                 opacity:
-                  (contributeLoading ||
-                  details?.statusCompaign != "3") && "0.5",
+                  (contributeLoading || details?.statusCompaign != "3") &&
+                  "0.5",
                 cursor: contributeLoading && "progress",
               }}
               disabled={contributeLoading || details?.statusCompaign != "3"}
@@ -846,8 +846,8 @@ function Details() {
                 style={{
                   height: "2rem",
                   opacity:
-                    (withdrawLoading ||
-                    details?.statusCompaign != "0") && "0.5",
+                    (withdrawLoading || details?.statusCompaign != "0") &&
+                    "0.5",
                   cursor: withdrawLoading && "progress",
                 }}
                 disabled={withdrawLoading || details?.statusCompaign != "0"}
